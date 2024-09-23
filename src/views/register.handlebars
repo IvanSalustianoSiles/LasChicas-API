@@ -1,0 +1,19 @@
+<div>
+    <h1>Registrarse</h1>
+    <form id="registerForm" method="post" action={{postAction}}>
+        <input required="true" placeholder="Nombre" name="first_name" type="text">
+        <input required="true" placeholder="Apellido" name="last_name" type="text">
+        <input required="true" placeholder="Contraseña" name="password" type="password">
+        <input required="true" placeholder="Email" name="email" type="email">
+        <input required="true" placeholder="Número" name="phoneNumber" type="tel">
+        <input placeholder="Descripción" name="description" type="text">
+        <input placeholder="Edad" name="age" type="number">
+        {{#if showError}}
+            <div style="color: rgb(191, 22, 22)">
+                {{errorMessage}}
+            </div>
+        {{/if}}
+        <button id="sendButton" type="submit">Registrarse</button>
+    </form>
+    <p>¿Ya tienes cuenta? Haz click en <a href={{hrefLog}}>iniciar sesión</a>.</p>
+</div>

@@ -1,0 +1,18 @@
+<div>
+    <h1>Iniciar sesión</h1>
+    <form action={{postAction}} method="post">
+        <input placeholder="Correo electrónico" name="email" type="email" required="true">
+        <input placeholder="Contraseña" name="password" type="password">
+        {{#if showError}}
+            <div style="color: rgb(191, 22, 22)">
+                {{errorMessage}}
+            </div>
+        {{/if}}
+        <button type="submit">Ingresar</button>
+    </form>
+    <div>
+        <button onclick="window.location.replace('/api/auth/ghlogin')">Ingresar con GitHub</button>
+        <button onclick="window.location.replace('/restore')">¿Olvidaste tu contraseña?</button>
+    </div>
+    <p>¿No tienes cuenta? Entonces <a href={{hrefReg}}>regístrate</a>.</p>
+</div>

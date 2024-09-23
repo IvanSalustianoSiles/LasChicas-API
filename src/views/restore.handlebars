@@ -1,0 +1,20 @@
+<div>
+    <h1>Recuperación de contraseña</h1>
+    {{#if showOk}}
+    <h2 style="color: rgb(78, 212, 16)">
+        {{okMessage}}
+    </h2>
+    {{else}}
+        <form action={{postAction}} method="post">
+            <div>Ingrese su correo electrónico.</div>
+            <input placeholder="Correo electrónico" name="email" type="email" required="true">
+            {{#if showError}}
+                <div style="color: rgb(191, 22, 22)">
+                    {{errorMessage}}
+                </div>
+            {{/if}}
+            <button type="submit">Enviar</button>
+            <button onclick="window.location.replace('/login')">Regresar</button>
+        </form>
+    {{/if}}
+</div>

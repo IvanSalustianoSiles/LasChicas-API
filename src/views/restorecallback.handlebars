@@ -1,0 +1,15 @@
+<div>
+    <h1>Restablecer contraseña</h1>
+    <form action={{postAction}} method="post">
+        <div>Ingrese su nueva contraseña.</div>
+        <input placeholder="Contraseña" name="password" type="password" required="true">
+        {{#if dataErrorContainer}}
+            <div style="color: rgb(191, 22, 22)">
+                {{dataError}}
+            </div>
+        {{/if}}
+        <div>Confirmación:</div>
+        <input placeholder="Contraseña" name="password2" type="password" required="true">
+        <button type="submit">Restablecer</button>
+    </form>
+</div>

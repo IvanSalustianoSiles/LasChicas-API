@@ -1,0 +1,37 @@
+<div>
+    <h1>Documentos</h1>
+    <div></div>
+    <h1>Carga de documentos</h1>
+    <form id="docsForm" enctype="multipart/form-data">
+        <div>Identificación</div>
+        <input type="file" name="ident">
+        <div>Comprobante de domicilio</div>
+        <input type="file" name="domicilio">
+        <div>Comprobante de estado de cuenta</div>
+        <input type="file" name="cuenta">
+        <button id="sendButton" onclick="sendDocs()" type="submit">Cargar</button>
+    </form>
+</div>
+
+<script>
+    const docsForm = document.getElementById("docsForm");
+    const sendButton = document.getElementById("sendButton");
+
+    docsForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+    });
+
+    const sendDocs = () => {
+
+        let formData = new FormData();
+        console.log(docsForm[3]);
+        for (let i = 0; i < 3; i++) {
+            formData.append("docs", docsForm[i].files[0]);
+        }
+        
+        fetch("{{postAction}}", {
+            method: "POST",
+            body: formData
+        })
+    }
+</script>

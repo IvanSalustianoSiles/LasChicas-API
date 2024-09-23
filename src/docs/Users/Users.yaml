@@ -1,0 +1,214 @@
+openapi: 3.0.1
+info:
+  title: Documentación de API 'Las Chicas'
+  description: Documentación completa de toda mi API
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Servidor de desarrollo
+paths:
+  /api/users:
+    get:
+      summary: Obtener usuarios
+      description: Obtiene una lista de usuarios paginados
+      parameters:
+        - name: limit
+          in: query
+          description: Límite de usuarios por página
+          required: false
+          schema:
+            type: integer
+        - name: page
+          in: query
+          description: Página de resultados
+          required: false
+          schema:
+            type: integer
+        - name: role
+          in: query
+          description: Filtrar por rol de usuario
+          required: false
+          schema:
+            type: string
+      responses:
+        200:
+          description: Lista de usuarios
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                  payload:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+    post:
+      summary: Crear un nuevo usuario
+      description: Crea un nuevo usuario (solo administradores)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewUser'
+      responses:
+        200:
+          description: Usuario creado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                  payload:
+                    $ref: '#/components/schemas/User'
+  /api/users/{id}:
+    put:
+      summary: Actualizar un usuario
+      description: Actualiza la información de un usuario por ID (solo administradores)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del usuario
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdate'
+      responses:
+        200:
+          description: Usuario actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  origin:
+                    type: string
+                  payload:
+                    $ref: '#/components/schemas/User'
+    delete:
+      summary: Eliminar un usuario
+      description: Elimina un usuario por ID (solo administradores)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del usuario
+          schema:
+            type: string
+      responses:
+        200:
+          description: Usuario eliminado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  origin:
+                    type: string
+                  payload:
+                    $ref: '#/components/schemas/User'
+  /api/users/restore:
+    post:
+      summary: Enviar enlace de restauración de contraseña
+      description: Envía un enlace al correo electrónico del usuario para restaurar la contraseña
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RestoreRequest'
+      responses:
+        200:
+          description: Enlace de restauración enviado exitosamente
+  /api/users/restorecallback:
+    post:
+      summary: Validar cambio de contraseña
+      description: Valida el cambio de contraseña del usuario mediante el código enviado
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordUpdate'
+      responses:
+        200:
+          description: Contraseña actualizada exitosamente
+  /api/users/premium/{uid}:
+    post:
+      summary: Cambiar el rol de un usuario
+      description: Cambia el rol de un usuario a 'premium' o 'user' (solo administradores)
+      parameters:
+        - name: uid
+          in: path
+          required: true
+          description: ID del usuario
+          schema:
+            type: string
+      responses:
+        200:
+          description: Rol actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  origin:
+                    type: string
+                  payload:
+                    type: string
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        _id:
+          type: string
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+    NewUser:
+      type: object
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+    UserUpdate:
+      type: object
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+    RestoreRequest:
+      type: object
+      properties:
+        email:
+          type: string
+    PasswordUpdate:
+      type: object
+      properties:
+        password:
+          type: string

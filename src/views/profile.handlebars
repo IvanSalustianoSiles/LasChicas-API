@@ -1,0 +1,15 @@
+<div>
+    <h1>{{user.first_name}} {{user.last_name}}</h1>
+    <h2>Rol: {{user.role}}</h2>
+    <div style="color: greenyellow;">
+        {{#if showWarning}}
+            {{warning}}
+        {{/if}}
+    </div>
+    <h3>{{user.description}}</h3>
+    <hr>
+    <button onclick="window.location.replace('/products')">Menú principal</button>
+    <form action="/api/auth/logout" method="get">
+        <button type="submit">Cerrar sesión</button>
+    </form>
+</div>

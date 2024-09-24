@@ -31,7 +31,7 @@ class TicketFSClass {
       
       await this.updateFile(this.ticketsArray);
     } catch (error) {
-      throw new CustomError(error.type, `[Service::FS]: ${error.message}`);
+      return undefined;
     };
   };
   getTicket = async (tid) => {
@@ -42,7 +42,7 @@ class TicketFSClass {
       if (!myTicket) throw new CustomError(errorDictionary.GENERAL_FOUND_ERROR, "Ticket");
       return myTicket;
     } catch (error) {
-      throw new CustomError(error.type, `[Service::FS]: ${error.message}`);
+      return undefined;
     };
   };
   getAllTickets = async () => {
@@ -51,14 +51,14 @@ class TicketFSClass {
       if (!this.ticketsArray) throw new CustomError(errorDictionary.GENERAL_FOUND_ERROR, `Tickets`);
       return this.ticketsArray;
     } catch (error) {
-      throw new CustomError(error.type, `[Service::FS]: ${error.message}`);
+      return undefined;
     };
   };
   updateFile = async (array) => {
     try {
       fs.writeFile(`${this.path}`, JSON.stringify(array), () => {});
     } catch (error) {
-      throw new CustomError(error.type, `[Service::FS]: ${error.message}`);
+      return undefined;
     }
   };
   readFileAndSave = async () => {
@@ -72,7 +72,7 @@ class TicketFSClass {
       }
       return this.ticketsArray;
     } catch (error) {
-      throw new CustomError(error.type, `[Service::FS]: ${error.message}`);
+      return undefined;
     };
   };
 };

@@ -1,21 +1,28 @@
 <div>
     <h1>Carrito</h1>
-    <h2>Productos</h2>
-    <div>
-        {{#each toSendObject}}
-            <div>
-                <h2>{{title}}</h2>
-                <img src={{thumbnail}} alt={{title}}>
-                <h3>${{price}}</h3>
-                <h4>Categoría: {{category}}</h4>
-                <p>{{description}}</p>
-                <h4>Cantidad: {{quantity}}, máximo {{stock}}</h4>
-            </div>
-            <div>
-                <h2>ID del producto: {{_id}}</h2>
-            </div>
-            <hr>      
-        {{/each}}
-    </div>
+    {{#if voidWarning}}
+        <h3>Su carrito se encuentra vacío.</h3>
+    {{else}}
+        <h2>Productos</h2>
+        <div>
+            {{#each toSendObject}}
+                <div>
+                    <h2>{{title}}</h2>
+                    <img src={{thumbnail}} alt={{title}}>
+                    <h3>${{price}}</h3>
+                    <h4>Categoría: {{category}}</h4>
+                    <p>{{description}}</p>
+                    <h4>Cantidad: {{quantity}}, máximo {{stock}}</h4>
+                </div>
+                <div>
+                    <h2>ID del producto: {{_id}}</h2>
+                </div>
+                <hr>      
+            {{/each}}
+        </div>
+        <button onclick="window.location.replace(`{{purchaseAction}}`)">Finalizar la compra</button>
+    {{/if}}
+    <button onclick="window.location.replace(`/products`)">Más productos</button>
+    <button onclick="window.location.replace(`/profile`)">Tu perfil</button>
 </div>
 <script></script>

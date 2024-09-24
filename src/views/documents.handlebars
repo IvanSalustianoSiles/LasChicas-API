@@ -24,7 +24,6 @@
     const sendDocs = () => {
 
         let formData = new FormData();
-        console.log(docsForm[3]);
         for (let i = 0; i < 3; i++) {
             formData.append("docs", docsForm[i].files[0]);
         }

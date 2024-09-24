@@ -203,7 +203,7 @@ class ProductFSClass {
     try {
       fs.writeFileSync(`${this.path}`, JSON.stringify(array), () => {});
     } catch (error) {
-      throw new CustomError(error.type, `[Service::FS]: ${error.message}`);
+      return undefined;
     }
   };
   readFileAndSave = async () => {
@@ -217,7 +217,7 @@ class ProductFSClass {
       }
       return this.productsArray;
     } catch (error) {
-      throw new CustomError(error.type, `[Service::FS]: ${error.message}`);
+      return undefined;
     };
   };
   getAllProducts = async () => {

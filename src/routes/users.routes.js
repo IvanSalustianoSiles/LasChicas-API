@@ -155,11 +155,38 @@ router.post("/:uid/documents", uploader.array("docs"), verifyMDBID(["uid"]), asy
   try {
     const { uid } = req.params;
     if (req.files.length == 3) {
-      const updatedUser = await UserManager.updateUser({ email: req.user.email }, { status: true }, { new: true });
+      const updatedUser = await UserManager.updateUser({ _id: uid }, { status: true }, { new: true });
       if (!updatedUser) throw new CustomError(errorDictionary.UPDATE_DATA_ERROR, "Usuario");
     }
     const addingFiles = await UserManager.addFiles(uid, req.files);
     if (!addingFiles) throw new CustomError(errorDictionary.ADD_DATA_ERROR, "Usuario");
+  } catch (error) {
+    res.send({ origin: config.SERVER, error: `[ERROR::${error.type.status}; CODE::${error.type.code}]: ${error.type.message}`});
+  }
+});
+router.delete("/", handlePolicies(["ADMIN"]), async (req, res) => {
+  try {    
+    const deletedUsers = await UserManager.deleteAllInactiveUsers(1000 * 60 * 60 * 48);
+    
+    if (!deletedUsers) throw new CustomError(errorDictionary.DELETE_DATA_ERROR, "Usuarios");
+    deletedUsers.forEach( async (user) => {
+      let userEmail = user.email;
+      if (!userEmail) throw new CustomError(errorDictionary.FEW_PARAMS_ERROR, "Email");
+      let emailSending = await transport.sendMail({
+        from: `Las Chicas <${config.GMAIL_APP_USER}>`, 
+        to: userEmail,
+        subject: `[NO RESPONDER A ESTE CORREO] Cuenta eliminada por inactividad`,
+        html: 
+        `<div> 
+          <h1>Hola, ${user.first_name}!</h1>
+          <h2>Lamentamos informarte que tu cuenta ha sido eliminada por inactividad.</h2>
+          <h3>Puedes crear otra cuenta o comunicarte con el departamento técnico (+54 11 3287-4847)</h3>
+          <h3>¡Esperamos volver a verte pronto!</h3>
+          <h4>Hora [ARG]: ${generateDateAndHour()}</h4>
+        </div>`
+      });
+    });
+    res.send({ origin: config.SERVER, payload: deletedUsers });
   } catch (error) {
     res.send({ origin: config.SERVER, error: `[ERROR::${error.type.status}; CODE::${error.type.code}]: ${error.type.message}`});
   }

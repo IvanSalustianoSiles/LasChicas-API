@@ -79,9 +79,9 @@ class UserManagerClass {
       throw new CustomError(error.type, `[updateUser]: ${error.message}`);
     }
   };
-  deleteUser = async (filter) => {
+  deleteUser = async (filter, options) => {
     try {
-      return await this.service.deleteUser(filter);
+      return await this.service.deleteUser(filter, options);
     } catch (error) {
       throw new CustomError(error.type, `[deletetUser]: ${error.message}`);
     }
@@ -101,6 +101,13 @@ class UserManagerClass {
       throw new CustomError(error.type, `[paginateUsers]: ${error.message}`);
     }
   };
+  deleteAllInactiveUsers = async (timeForDelete) => {
+    try {
+      return await this.service.deleteAllInactiveUsers(timeForDelete);
+    } catch (error) {
+      return undefined;
+    }
+  }
 };
 
 // Métodos a utilizar:

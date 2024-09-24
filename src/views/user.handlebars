@@ -1,0 +1,33 @@
+<div>
+    <div id="firstBox">
+        <h1>Usuario: {{first_name}} {{last_name}}</h1>
+        <p>Email: {{email}}</p>
+        <p>Rol: {{role}}</p>
+        <p>Número: {{phoneNumber}}</p>
+        <button onclick="window.location.replace(`{{roleChangeAction}}`)">Cambiar de rol</button>
+        <form id="deleteForm">
+            <button onclick="deleteUser()" type="submit">Eliminar usuario</button>
+        </form>
+    </div>
+    <div id="secondBox"></div>
+</div>
+<script>
+    const deleteForm = document.getElementById("deleteForm");
+    const firstBox = document.getElementById("firstBox");
+    const secondBox = document.getElementById("secondBox");
+    deleteForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+    })
+    const deleteUser = () => {
+
+        fetch("{{deleteUserAction}}", {
+            method: "DELETE",
+            body: {}
+        }).then(res => {
+            firstBox.style.display = "none";
+            secondBox.innerText = "Usuario eliminado con éxito";
+        }).catch(error => {
+            secondBox.innerText = "Error al eliminar este usuario";
+        });
+    };
+</script>

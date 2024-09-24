@@ -17,26 +17,6 @@ const transport = nodemailer.createTransport({
     pass: config.GMAIL_APP_PASSWORD
   }
 });
-const cartPolicies = () => {
-  return async (req, res, next) => {
-
-    try {
-      const { cid, pid } = req.params;
-      let user = req.user;
-      if (!user) throw new CustomError(errorDictionary.AUTHENTICATE_USER_ERROR);
-      let role = user.role.toUpperCase();
-      console.log(role);
-      if (role == "ADMIN") return next();
-      const userCartId = req.user.cart;
-      if (userCartId != cid) throw new CustomError(errorDictionary.AUTHENTICATE_USER_ERROR);
-      const thisProduct = await ProductManager.getProductById(pid);
-      if (role == "PREMIUM" && req.user.email == thisProduct.owner) throw new CustomError(errorDictionary.AUTHENTICATE_USER_ERROR);
-      next();
-    } catch (error) {
-      res.redirect(`/products?error=${encodeURI(`[${error.type}]: ${error.message}`)}`);
-    }
-  }
-};
 
 router.get("/", async (req, res) => {
   try {
@@ -70,7 +50,7 @@ router.get("/:cid", verifyMDBID(["cid"]), async (req, res) => {
     res.send({ origin: config.SERVER, status: error.status, type: error.type, message: error.message });
 }
 });
-router.post("/:cid/product/:pid", verifyMDBID(["cid", "pid"]), cartPolicies(), async (req, res) => {
+router.post("/:cid/product/:pid", verifyMDBID(["cid", "pid"], { compare: "CART" }), async (req, res) => {
   try {
     const { pid, cid } = req.params;
     toSendObject = await CartManager.addProduct(pid, cid);
@@ -81,7 +61,7 @@ router.post("/:cid/product/:pid", verifyMDBID(["cid", "pid"]), cartPolicies(), a
     res.send({ origin: config.SERVER, status: error.status, type: error.type, message: error.message });
 }
 });
-router.delete("/:cid/product/:pid", verifyMDBID(["cid", "pid"]), cartPolicies(), async (req, res) => {
+router.delete("/:cid/product/:pid", verifyMDBID(["cid", "pid"], { compare: "CART" }), async (req, res) => {
   try {
     const { pid, cid } = req.params;
     toSendObject = await CartManager.deleteProduct(pid, cid);
@@ -104,7 +84,7 @@ router.put("/:cid", verifyMDBID(["cid"]), async (req, res) => {
     res.send({ origin: config.SERVER, status: error.status, type: error.type, message: error.message });
 };
 });
-router.put("/:cid/product/:pid", verifyMDBID(["cid", "pid"]), cartPolicies(), async (req, res) => {
+router.put("/:cid/product/:pid", verifyMDBID(["cid", "pid"], { compare: "CART" }), async (req, res) => {
   try {
     // Formato del body: {"quantity": Number}
     const { pid, cid } = req.params;
@@ -116,7 +96,7 @@ router.put("/:cid/product/:pid", verifyMDBID(["cid", "pid"]), cartPolicies(), as
     res.send({ origin: config.SERVER, status: error.status, type: error.type, message: error.message });
 };
 });
-router.delete("/:cid", verifyMDBID(["cid"]), async (req, res) => {
+router.delete("/:cid", verifyMDBID(["cid"], { compare: "CART" }), async (req, res) => {
   try {
     const { cid } = req.params;
     toSendObject = await CartManager.deleteAllProducts(cid);
@@ -128,7 +108,7 @@ router.delete("/:cid", verifyMDBID(["cid"]), async (req, res) => {
     res.send({ origin: config.SERVER, status: error.status, type: error.type, message: error.message });
 };
 });
-router.get("/:cid/purchase", handlePolicies(["USER"]), verifyMDBID(["cid"]), async (req, res) => {
+router.get("/:cid/purchase", handlePolicies(["USER", "PREMIUM"]), verifyMDBID(["cid"], { compare: "CART" }), async (req, res) => {
   try {
     const { cid } = req.params;
     let cartProducts = await CartManager.getProductsOfACart(cid);
@@ -188,8 +168,10 @@ router.get("/:cid/purchase", handlePolicies(["USER"]), verifyMDBID(["cid"]), asy
     let fullMessage = msg.join("") || "Todos los productos aprobados.";
 
     await req.logger.info(`${new Date().toDateString()} Confirmación de compra enviada. ${req.url}`);
-
-    return res.send({ origin: config.SERVER, payload: `Ticket exitosamente creado. Revise su bandeja de entrada`,  message: fullMessage });
+    
+    const queryObject = { payload: `Ticket exitosamente creado. Revise su bandeja de entrada`,  message: fullMessage }
+    
+    res.redirect(`/purchasecompleted?payload=${encodeURI(queryObject.payload)}&&message=${encodeURI(queryObject.message)}`);
   } catch (error) {
     req.logger.error(`${new Date().toDateString()}; ${error}; ${req.url}`);
     res.send({ origin: config.SERVER, status: error.status, type: error.type, message: error.message });

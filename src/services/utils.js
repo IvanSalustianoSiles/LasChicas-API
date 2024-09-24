@@ -58,7 +58,7 @@ export const verifyMDBID = (ids, check = undefined) => {
         let id = ids[i];
         if (!config.MONGODB_ID_REGEX.test(req.params[id])) throw new CustomError(errorDictionary.AUTHORIZE_ID_ERROR, `${req.params[id]}`);
       } 
-      if (check !== undefined && check.compare) {
+      if (check !== undefined && check.compare && req.session.user.role.toUpperCase() != "ADMIN") {
         if ((check.compare == "USER" && req.params["uid"] != req.session.user._id) || (check.compare == "CART" && req.params["cid"] != req.session.user.cart)) throw new CustomError(errorDictionary.AUTHORIZE_USER_ERROR, "No corresponde su ID");
       }
       next();
@@ -72,8 +72,6 @@ export const verifyRequiredBody = (requiredFields) => {
    
   return (req, res, next) => {
     try {
-
-      console.log(req.body);
       
       const allOk = requiredFields.every((field) => {
 
@@ -110,9 +108,10 @@ export const handlePolicies = (policies) => {
   return (req, res, next) => {
     try {   
       if (policies[0] === "PUBLIC") return next();
+      
       let user = req.session.user;
-      if (!user) throw new CustomError(errorDictionary.AUTHENTICATE_USER_ERROR);
-      let role = user.role.toUpperCase();
+      if (!user) res.redirect("/login");
+      let role = user.role.toUpperCase();   
       if (!policies.includes(role)) throw new CustomError(errorDictionary.AUTHORIZE_USER_ERROR);
       req.user = user;
       next();

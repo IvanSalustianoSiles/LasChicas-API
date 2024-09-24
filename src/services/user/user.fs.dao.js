@@ -65,58 +65,104 @@ class UserFSClass {
       return undefined;
     }
   };
-  updateUser = async (filter, update, options = { new: true }) => {
+  updateUser = async (filter, update, options = { multi: false, new: true }) => {
     try {
-        await this.readFileAndSave();
-        let filteredUser = {};
-        for (let i = 0; i < Object.values(filter).length; i++) {
-          let filterValue = Object.values(filter)[i];
-          let filterProp = Object.keys(filter)[i];
+      await this.readFileAndSave();
+      for (let i = 0; i < Object.values(filter).length; i++) {
+        let filterValue = Object.values(filter)[i];
+        let filterProp = Object.keys(filter)[i];
+        this.userArray = this.userArray.filter(user => user[filterProp] == filterValue);
+        if (filterValue.less) {
+          this.userArray = this.userArray.filter(user => user[filterProp] < filterValue.less);
+        } else if (filterValue.greater) {
+          this.userArray = this.userArray.filter(user => user[filterProp] > filterValue.greater);
+        } else {
           this.userArray = this.userArray.filter(user => user[filterProp] == filterValue);
-        };
-        filteredUser = await this.userArray[0];
-        if (!filteredUser) throw new CustomError(errorDictionary.FOUND_USER_ERROR, `Usuario a actualizar`);
-        let updatedUser = filteredUser;
+        }
+      };      
+      if (options.multi == true) {
+        let filteredUsers = this.userArray;
+        if (!filteredUsers) throw new CustomError(errorDictionary.FOUND_USER_ERROR, `Usuarios a actualizar`);
+        let updatedUsers = [...filteredUsers];
         await this.readFileAndSave();
-        const userIndex = this.userArray.indexOf(filteredUser);
+        for (let i = 0; i < Object.values(update).length; i++) {
+          let updateValue = Object.values(update)[i];
+          let updateProp = Object.keys(update)[i];
+          for (let j = 0; j < updatedUsers.length; j++) {
+            updatedUsers[j][updateProp] = updateValue;
+            let foundUser = this.userArray.find(user => user.email == filteredUsers[j].email);                   
+            let userIndex = this.userArray.indexOf(foundUser);
+            this.userArray.splice(userIndex, 1, updatedUsers[j]);
+          }
+        };
+        await this.updateFile(this.userArray);
+        if (options.new == true) {
+          return updatedUsers;
+        } else {
+          return filteredUsers;
+        };
+      } else {
+        let filteredUser = this.userArray[0];
+        if (!filteredUser) throw new CustomError(errorDictionary.FOUND_USER_ERROR, `Usuario a actualizar`);
+        let updatedUser = {...filteredUser};
         for (let i = 0; i < Object.values(update).length; i++) {
           let updateValue = Object.values(update)[i];
           let updateProp = Object.keys(update)[i];
           updatedUser[updateProp] = updateValue;
         };
-
-        if (!updatedUser) throw new CustomError(errorDictionary.FOUND_USER_ERROR, `Usuario actualizado`);
-  
+        await this.readFileAndSave();    
+        const foundUser = this.userArray.find(user => user.email == filteredUser.email);                   
+        const userIndex = this.userArray.indexOf(foundUser);                
         this.userArray.splice(userIndex, 1, updatedUser);
-        await this.updateFile(this.userArray);
+        await this.updateFile(this.userArray);    
         if (options.new == true) {
           return updatedUser;
         } else {
           return filteredUser;
         };
+      }
     } catch (error) {
       return undefined;
     };
   };
-  deleteUser = async (filter) => {
+  deleteUser = async (filter, options = { multi: false }) => {
     try {
       await this.readFileAndSave();
-      let filteredUser = {hombre: true, casado: false, money: 0};
       for (let i = 0; i < Object.values(filter).length; i++) {
         let filterValue = Object.values(filter)[i];
         let filterProp = Object.keys(filter)[i];
-        this.userArray = this.userArray.filter(user => user[filterProp] == filterValue);
+        if (filterValue.less) {
+          this.userArray = this.userArray.filter(user => user[filterProp] < filterValue.less);
+        } else if (filterValue.greater) {
+          this.userArray = this.userArray.filter(user => user[filterProp] > filterValue.greater);
+        } else {
+          this.userArray = this.userArray.filter(user => user[filterProp] == filterValue);
+        }
       };
-      filteredUser = await this.userArray[0];
-      if (!filteredUser) throw new CustomError(errorDictionary.FOUND_USER_ERROR, `Usuario a eliminar`);
-      await this.readFileAndSave();
-      let filteredIndex = this.userArray.indexOf(filteredUser);
-      this.userArray.splice(filteredIndex, 1);
-      await this.updateFile(this.userArray);
-      return filteredUser;
+      if (options.multi == true) {
+        let filteredUsers = this.userArray;
+        if (!filteredUsers) throw new CustomError(errorDictionary.FOUND_USER_ERROR, `Usuarios a eliminar`);
+        await this.readFileAndSave();
+        for (let i = 0; i < filteredUsers.length; i++) {
+          let foundUser = this.userArray.find(user => user.email == filteredUsers[i].email);                   
+          let userIndex = this.userArray.indexOf(foundUser);
+          this.userArray.splice(userIndex, 1);
+        }
+        await this.updateFile(this.userArray);
+        return filteredUsers;
+      } else {
+        let filteredUser = this.userArray[0];
+        if (!filteredUser) throw new CustomError(errorDictionary.FOUND_USER_ERROR, `Usuario a actualizar`);
+        await this.readFileAndSave();
+        const foundUser = this.userArray.find(user => user.email == filteredUser.email);                   
+        const userIndex = this.userArray.indexOf(foundUser);
+        this.userArray.splice(userIndex, 1);
+        await this.updateFile(this.userArray);    
+        return filteredUser;
+      }
     } catch (error) {
       return undefined;
-    }
+    };
   };
   paginateUsers = async (limit = 10, page = 1, role, where) => {
     try {
@@ -167,8 +213,8 @@ class UserFSClass {
       this.getting = false;
 
       const paginateUsersFormat = pageUsers.map( user => {
-        user = { _doc: user, _id: user._id }
-        return user;
+        const { first_name, last_name, role, email, ...restUser } = user;
+        return { first_name: first_name, last_name: last_name, role: role, email: email };
       });
 
       const toSendObject = {
@@ -220,6 +266,17 @@ class UserFSClass {
 
       return updatedUser;
       
+    } catch (error) {
+      return undefined;
+    }
+  };
+  deleteAllInactiveUsers = async (timeForDelete) => {
+    try {
+      const limitDate = new Date();
+      limitDate.setDate(limitDate.getDate() - timeForDelete / 1000 / 60 / 60 / 24);
+      const deletedUsers = await this.deleteUser({ last_connection: { less: limitDate }}, { multi: true });
+      if (!deletedUsers) throw new CustomError(errorDictionary.DELETE_DATA_ERROR, "Usuarios");
+      return deletedUsers;
     } catch (error) {
       return undefined;
     }

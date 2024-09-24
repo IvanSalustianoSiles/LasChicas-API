@@ -1,0 +1,11 @@
+<div>
+    {{#if showError}}
+        <h1>Lo sentimos, no fue posible completar la compra.</h1>
+        <div>{{error}}</div>
+    {{else}}
+        <h1>Compra completada!</h1>
+        <div>{{payload}}</div>
+        <div>{{message}}</div>
+    {{/if}}
+    <button onclick="window.location.replace(`/products`)">Seguir comprando</button>
+</div>

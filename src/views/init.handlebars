@@ -1,0 +1,11 @@
+<div>
+    {{#if sessionActive}}
+        <h1>Nos vemos de nuevo, {{name}}!</h1>
+        <button onclick="window.location.replace(`/products`)">Productos</button>
+        <button onclick="window.location.replace(`/profile`)">Tu perfil</button>
+    {{else}}
+        <h1>Bienvenido a Las Chicas API 1.0!</h1>
+        <button onclick="window.location.replace(`/login`)">Iniciar sesión</button>
+        <button onclick="window.location.replace(`/register`)">Registrarse</button>
+    {{/if}}
+</div>

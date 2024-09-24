@@ -1,14 +1,16 @@
 <div id="page">
-    {{#if showName}}
+    {{#if sessionActive}}
         <h1>Bienvenido, {{first_name}} {{last_name}}!</h1>
+        <button onclick="window.location.replace(`/profile`)">Tu perfil</button>
+        <button onclick="window.location.replace(`{{cartUrl}}`)">Carrito</button>
     {{/if}}
     <h1>Productos</h1>
     {{#if showError}}
         <h2>{{error}}!</h2>
     {{/if}}
     <div>
-        {{#each payload.docs}}
-            <div>
+        {{#each products}}
+            <div class="divProduct">
                 <h2>{{_doc.title}}</h2>
                 <img src={{_doc.thumbnail}} alt={{title}}>
                 <h3>${{_doc.price}}</h3>
@@ -16,39 +18,50 @@
                 <p>{{_doc.description}}</p>
                 <h4>Quedan {{_doc.stock}} ejemplares</h4>
             </div>
-            <button id={{_id}} class="addToCart">Agregar al carrito</button>      
+            <button id={{_doc._id}} class="addButton">Agregar al carrito</button>      
+            <div id={{_doc._id}} class="secretProductDiv">
+                <div>{{_doc.title}}</div>
+                <div>{{_doc.description}}</div>
+                <div>{{_doc.price}}</div>
+                <div>{{_doc.code}}</div>
+                <div>{{_doc.stock}}</div>
+                <div>{{_doc.category}}</div>
+                <div>{{_doc.status}}</div>
+                <img src="{{_doc.thumbnail}}" alt={{_doc.title}}/>
+                <div>{{_doc.owner}}</div>
+                <div>{{_doc._id}}</div>
+            </div>
         {{/each}}
     </div>
-    <span><a href='{{{prevLink}}}'>← {{{payload.prevPage}}}</a>| {{{payload.page}}} de {{{payload.totalPages}}} |<a href='{{{nextLink}}}'>{{{payload.nextPage}}} →</a></span>
+    <span><a href='{{{prevLink}}}'>← {{{prevPage}}}</a>| {{{page}}} de {{{totalPages}}} |<a href='{{{nextLink}}}'>{{{nextPage}}} →</a></span>
 </div>
 <script>
-    const localPayload = {
-        totalDocs: {{{toSendObject.payload.totalDocs}}},
-        limit: {{{toSendObject.payload.limit}}},
-        totalPages: {{{toSendObject.payload.totalPages}}},
-        page: {{{toSendObject.payload.page}}},
-        pagingCounter: {{{toSendObject.payload.pagingCounter}}},
-        hasPrevPage: '{{{toSendObject.payload.hasPrevPage}}}',
-        hasNextPage: '{{{toSendObject.payload.hasNextPage}}}',
-        prevPage: '{{{toSendObject.payload.prevPage}}}', 
-        nextPage: '{{{toSendObject.payload.nextPage}}}',
-        nextLink: '{{{toSendObject.nextLink}}}',
-        prevLink: '{{{toSendObject.prevLink}}}'
-    }
-    const { totalDocs, limit, totalPages, page, pagingCounter, hasPrevPage, hasNextPage, prevPage, nextPage, nextLink, prevLink } = localPayload;
-    const addButtons = document.querySelectorAll(".addToCart");
-    let sendArray = []
-    addButtons.forEach(addButton => {
-        let buttonId = addButton.id;
-        addButton.addEventListener("click", () => {
-            let toSendObject = {add: true, ID: buttonId};
-            fetch("/products", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(toSendObject)
-            })
-        })
+    const addButtons = document.querySelectorAll(".addButton");
+    const divProducts = document.querySelectorAll(".secretProductDiv");
+    let productsArray = [];
+    divProducts.forEach(divProduct => {
+        let product = {
+            title: divProduct.children[0].textContent,
+            description: divProduct.children[1].textContent,
+            price: +divProduct.children[2].textContent,
+            code: +divProduct.children[3].textContent,
+            stock: +divProduct.children[4].textContent,
+            category: divProduct.children[5].textContent,
+            status: divProduct.children[6].textContent,
+            thumbnail: divProduct.children[7].src,
+            owner: divProduct.children[8].textContent,
+            _id: divProduct.children[9].textContent,
+
+        }
+        productsArray.push(product);
     })
+    addButtons.forEach(button => {
+        button.addEventListener("click", () => {
+            let myProduct = productsArray.find(product => product._id == button.id);
+            fetch(`{{cartAction}}/${myProduct._id}`, {
+                method: "POST",
+                body: myProduct
+            });
+        });
+    });
 </script>

@@ -1,8 +1,11 @@
+body {
+    margin: 0px !important;
+};
 .myH1 {
     background-color: rgb(48, 48, 48); 
     color: white; 
     text-align: center;
 }
-body {
-    margin: 0px !important;
+.secretProductDiv {
+    display: none;
 }

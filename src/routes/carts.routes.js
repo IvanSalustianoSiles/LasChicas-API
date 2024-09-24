@@ -18,7 +18,7 @@ const transport = nodemailer.createTransport({
   }
 });
 
-router.get("/", async (req, res) => {
+router.get("/", handlePolicies(["ADMIN"]), async (req, res) => {
   try {
     const carts = await CartManager.getAllCarts();
     if (!carts) throw new CustomError(errorDictionary.GENERAL_FOUND_ERROR, "Carritos");
@@ -28,7 +28,7 @@ router.get("/", async (req, res) => {
     res.send({ origin: config.SERVER, status: error.status, type: error.type, message: error.message });
 }
 });
-router.post("/", async (req, res) => {
+router.post("/", handlePolicies(["USER", "PREMIUM", "ADMIN"]), async (req, res) => {
   try {
     toSendObject = await CartManager.createCart();
     if (!toSendObject) throw new CustomError(errorDictionary.GENERATE_DATA_ERROR, `Carrito`);
@@ -39,7 +39,7 @@ router.post("/", async (req, res) => {
     res.send({ origin: config.SERVER, status: error.status, type: error.type, message: error.message });
 }
 });
-router.get("/:cid", verifyMDBID(["cid"]), async (req, res) => {
+router.get("/:cid", verifyMDBID(["cid"], { compare: "CART" }), async (req, res) => {
   try {
     const { cid } = req.params;
     toSendObject = await CartManager.getCartById(cid);
@@ -50,7 +50,7 @@ router.get("/:cid", verifyMDBID(["cid"]), async (req, res) => {
     res.send({ origin: config.SERVER, status: error.status, type: error.type, message: error.message });
 }
 });
-router.post("/:cid/product/:pid", verifyMDBID(["cid", "pid"], { compare: "CART" }), async (req, res) => {
+router.post("/:cid/product/:pid", handlePolicies(["USER", "PREMIUM", "ADMIN"]), verifyMDBID(["cid", "pid"], { compare: "CART" }), async (req, res) => {
   try {
     const { pid, cid } = req.params;
     toSendObject = await CartManager.addProduct(pid, cid);
@@ -61,7 +61,7 @@ router.post("/:cid/product/:pid", verifyMDBID(["cid", "pid"], { compare: "CART" 
     res.send({ origin: config.SERVER, status: error.status, type: error.type, message: error.message });
 }
 });
-router.delete("/:cid/product/:pid", verifyMDBID(["cid", "pid"], { compare: "CART" }), async (req, res) => {
+router.delete("/:cid/product/:pid", handlePolicies(["USER", "PREMIUM", "ADMIN"]), verifyMDBID(["cid", "pid"], { compare: "CART" }), async (req, res) => {
   try {
     const { pid, cid } = req.params;
     toSendObject = await CartManager.deleteProduct(pid, cid);
@@ -72,9 +72,8 @@ router.delete("/:cid/product/:pid", verifyMDBID(["cid", "pid"], { compare: "CART
     res.send({ origin: config.SERVER, status: error.status, type: error.type, message: error.message });
 }
 });
-router.put("/:cid", verifyMDBID(["cid"]), async (req, res) => {
+router.put("/:cid", handlePolicies(["USER", "PREMIUM", "ADMIN"]), verifyMDBID(["cid"], { compare: "CART" }), async (req, res) => {
   try {
-    // Formato del body: [{"quantity": Number, "_id:" String},...]
     const { cid } = req.params;
     toSendObject = await CartManager.updateCartById(cid, req.body);
     if (!toSendObject) throw new CustomError(errorDictionary.UPDATE_DATA_ERROR, `Carrito`);
@@ -84,7 +83,7 @@ router.put("/:cid", verifyMDBID(["cid"]), async (req, res) => {
     res.send({ origin: config.SERVER, status: error.status, type: error.type, message: error.message });
 };
 });
-router.put("/:cid/product/:pid", verifyMDBID(["cid", "pid"], { compare: "CART" }), async (req, res) => {
+router.put("/:cid/product/:pid", handlePolicies(["USER", "PREMIUM", "ADMIN"]), verifyMDBID(["cid", "pid"], { compare: "CART" }), async (req, res) => {
   try {
     // Formato del body: {"quantity": Number}
     const { pid, cid } = req.params;
@@ -96,7 +95,7 @@ router.put("/:cid/product/:pid", verifyMDBID(["cid", "pid"], { compare: "CART" }
     res.send({ origin: config.SERVER, status: error.status, type: error.type, message: error.message });
 };
 });
-router.delete("/:cid", verifyMDBID(["cid"], { compare: "CART" }), async (req, res) => {
+router.delete("/:cid", handlePolicies(["USER", "PREMIUM", "ADMIN"]), verifyMDBID(["cid"], { compare: "CART" }), async (req, res) => {
   try {
     const { cid } = req.params;
     toSendObject = await CartManager.deleteAllProducts(cid);

@@ -7,8 +7,8 @@ import CustomError from "../services/custom.error.class.js";
 import nodemailer from "nodemailer";
 import config from "../config.js";
 
-let toSendObject = {};
 const router = Router();
+let toSendObject = {};
 
 const productPolicies = () => {
   return async (req, res, next) => {
@@ -42,6 +42,7 @@ const transport = nodemailer.createTransport({
     pass: config.GMAIL_APP_PASSWORD
   }
 });
+
 // Routes
 
 router.get("/", async (req, res) => {

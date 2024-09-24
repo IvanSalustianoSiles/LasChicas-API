@@ -127,7 +127,7 @@ router.post("/restorecallback", async (req, res) => {
     res.send({ origin: config.SERVER, error: error});
   }
 });
-router.post("/premium/:uid", verifyMDBID(["uid"]), handlePolicies(["ADMIN"]), async (req, res) => {
+router.post("/premium/:uid", handlePolicies(["ADMIN"]), verifyMDBID(["uid"]), async (req, res) => {
   try {
     const { uid } = req.params;
 
@@ -151,7 +151,7 @@ router.post("/premium/:uid", verifyMDBID(["uid"]), handlePolicies(["ADMIN"]), as
     res.send({ origin: config.SERVER, error: error });
   }
 });
-router.post("/:uid/documents", uploader.array("docs"), verifyMDBID(["uid"]), async (req, res) => {
+router.post("/:uid/documents", uploader.array("docs"), handlePolicies(["USER", "PREMIUM", "ADMIN"]), verifyMDBID(["uid"], { compare: "USER" }), async (req, res) => {
   try {
     const { uid } = req.params;
     if (req.files.length == 3) {

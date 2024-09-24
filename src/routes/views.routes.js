@@ -66,57 +66,6 @@ router.get("/carts/:cid", handlePolicies(["USER", "PREMIUM", "ADMIN"]), verifyMD
     res.send({ origin: config.SERVER, status: error.status, type: error.type, message: error.message });
 }
 });
-// router.get("/realtimeproducts", handlePolicies(["USER", "PREMIUM", "ADMIN"]), async (req, res) => {
-//   try {
-//     toSendObject = await ProductManager.getPaginatedProducts();
-//     if (!toSendObject) throw new CustomError(errorDictionary.GENERAL_FOUND_ERROR, `Productos`);
-//     res.render("realTimeProducts", { toSendObject: toSendObject });
-//   } catch (error) {
-//     req.logger.error(`${new Date().toDateString()}; ${error}; ${req.url}`);
-//     res.send({ origin: config.SERVER, status: error.status, type: error.type, message: error.message });
-// }
-// });
-// router.post("/realtimeproducts", uploader.single("archivo"), async (req, res) => {
-//   try {
-//     const socketServer = await req.app.get("socketServer");
-//     const { newProduct, productAction } = JSON.parse(req.body.json);
-//     const { id } = newProduct;
-//     if (!newProduct || !productAction || id) throw new CustomError(errorDictionary.FEW_PARAMS_ERROR);
-//     if (productAction == "add") {
-//       let toAddProduct = {
-//         ...newProduct,
-//         thumbnail: req.file.filename,
-//         status: true,
-//       };
-//       const addingAndGetting = await ProductManager.addProducts(toAddProduct);
-//       if (!addingAndGetting) throw new CustomError(errorDictionary.ADD_DATA_ERROR, `Error al agregar productos`);
-//       const dbProduct = await addingAndGetting.find(product => {
-//         product.title == toAddProduct.title &&
-//         product.description == toAddProduct.description &&
-//         product.price == toAddProduct.price &&
-//         product.code == toAddProduct.code &&
-//         product.stock == toAddProduct.stock &&
-//         product.category == toAddProduct.category &&
-//         product.status == toAddProduct.status &&
-//         product.thumbnail == toAddProduct.thumbnail 
-//       });
-//       if (!dbProduct) throw new CustomError(errorDictionary.GENERAL_FOUND_ERROR, `Producto`);
-//       let toAddId = dbProduct._id;
-    
-//       await socketServer.emit("addConfirmed", { msg: "Producto agregado.", toAddId });
-//     } else if (productAction == "delete") {
-//       await ProductManager.deleteProductById(id);
-//       await socketServer.emit("deleteConfirmed", {
-//         msg: `Producto de ID ${id} eliminado.`,
-//         pid: id,
-//       });
-//     }
-//     res.render("realTimeProducts", { toSendObject: toSendObject });
-//   } catch (error) {
-//     req.logger.error(`${new Date().toDateString()}; ${error}; ${req.url}`);
-//     res.send({ origin: config.SERVER, status: error.status, type: error.type, message: error.message });
-// }
-// });
 router.get("/chat", handlePolicies(["USER"]), async (req, res) => {
   try {
     res.render("chat", {});
@@ -189,7 +138,7 @@ router.get("/restorecallback/:code", verifyRestoreCode(), async (req, res) => {
     res.send({ origin: config.SERVER, status: error.status, type: error.type, message: error.message });
   }
 });
-router.get("/roleChange/:uid", verifyMDBID(["uid"]), handlePolicies(["ADMIN"]), async (req, res) => {
+router.get("/roleChange/:uid", handlePolicies(["ADMIN"]), verifyMDBID(["uid"]), async (req, res) => {
   try {
     const { uid } = req.params;
     res.render("roleChange", { postAction: `/api/users/premium/${uid}` });
@@ -227,5 +176,5 @@ router.get("/purchasecompleted", async (req, res) => {
   } catch (error) {
     res.render("purchasecompleted", { showError: true, error: error });
   }
-})
+});
 export default router;

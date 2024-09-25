@@ -1,7 +1,6 @@
-import config from "../config.js";
-import { UserMDBService, UserFSService } from "../services/index.js";
-import { errorDictionary } from "../config.js";
-import CustomError from "../services/custom.error.class.js";
+import config, { errorDictionary } from "../config.js";
+import { UserMDBService, UserFSService, CustomError } from "../services/index.js";
+
 
 class UserDTOCLass {
   constructor() {
@@ -34,7 +33,6 @@ class UserDTOCLass {
 
 const DTO = new UserDTOCLass();
 
-// Clase para controlar los métodos referentes a los usuarios.
 class UserManagerClass {
   constructor(service) {
     this.service = service;
@@ -46,14 +44,14 @@ class UserManagerClass {
       if (!users) throw new CustomError(errorDictionary.GENERAL_FOUND_ERROR, `Users`);
       return users;
     } catch (error) {
-      throw new CustomError(error.type, `[Service::MDB]: ${error}`);
+      return undefined;
     };
   };
   isRegistered = async (focusRoute, returnObject, req, res) => {
     try {
       return await this.service.isRegistered(focusRoute, returnObject, req, res);
     } catch (error) {
-      throw new CustomError(error.type, `[isRegistered]: ${error.message}`);
+      return undefined;
     }
   };
   findUser = async (filter, noSensitive) => {
@@ -69,21 +67,21 @@ class UserManagerClass {
     try {
       return await this.service.addUser(user);
     } catch (error) {
-      throw new CustomError(error.type, `[addUser]: ${error.message}`);
+      return undefined;
     }
   };
   updateUser = async (filter, update, options) => {
     try {
       return await this.service.updateUser(filter, update, options);
     } catch (error) {
-      throw new CustomError(error.type, `[updateUser]: ${error.message}`);
+      return undefined;
     }
   };
   deleteUser = async (filter, options) => {
     try {
       return await this.service.deleteUser(filter, options);
     } catch (error) {
-      throw new CustomError(error.type, `[deletetUser]: ${error.message}`);
+      return undefined;
     }
   };
   paginateUsers = async (limit, page, role, where) => {
@@ -91,14 +89,14 @@ class UserManagerClass {
       const parsed = await DTO.parseStringToNumbers({limit, page, role, where});     
       return await this.service.paginateUsers(parsed != {} ? parsed.limit : limit, parsed != {} ? parsed.page : page, parsed != {} ? parsed.role : role, where);
     } catch (error) {
-      throw new CustomError(error.type, `[paginateUsers]: ${error.message}`);
+      return undefined;
     }
   };
   addFiles = async (uid, files) => {
     try {
       return await this.service.addFiles(uid, files);
     } catch (error) {
-      throw new CustomError(error.type, `[paginateUsers]: ${error.message}`);
+      return undefined;
     }
   };
   deleteAllInactiveUsers = async (timeForDelete) => {
@@ -107,17 +105,8 @@ class UserManagerClass {
     } catch (error) {
       return undefined;
     }
-  }
+  };
 };
-
-// Métodos a utilizar:
-// isRegistered (focusRoute, returnObject, req, res)
-// findUser (filter)
-// addUser (user)
-// updateUser (filter, update, options)
-// deleteUser (filter)
-// paginateUsers (...filters)
-
 
 const service = config.DATA_SOURCE == "MDB" 
 ? UserMDBService

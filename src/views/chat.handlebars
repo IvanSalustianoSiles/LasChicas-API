@@ -1,11 +1,12 @@
 <div>
-    <h1>Socket Chat</h1>
+    <h1>Chat online</h1>
     <input type="text" id="chat" placeholder="Ingrese un mensaje">
     <button onclick="sendMessage()">Enviar</button>
 </div>
 <div id="chatList">
 </div>
 <h4>El chat se limpiará cada 24hs.</h4>
+<button onclick="window.location.replace(`/profile`)">Volver al perfil</button>
 <script src="/socket.io/socket.io.js"> // Esta ruta porque trabajamos con handlebars</script> 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>

@@ -114,3 +114,14 @@
 [33merror[39m: Sun Sep 22 2024; ReferenceError: alreadyRegistered is not defined; /products
 [33merror[39m: Mon Sep 23 2024 02:40:32 GMT-0300 (hora estándar de Argentina); Error; /logout?
 [33merror[39m: Mon Sep 23 2024; Error: Carrito; /carts/66f0de3507a8bf1ce711af2c
+[33merror[39m: [ERROR[403]::CODE[3]: Usuario no autorizado. (Fallo en el rol) | ::[/profile]
+[33merror[39m: [ERROR[400]::CODE[16]: Error al agregar la información. (Texto específico) | ::[/api/auth/errorTest]
+[33merror[39m: [ERROR[400]::CODE[16]: Error al agregar la información. (Texto específico) | ::[/api/auth/errorTest]
+[33merror[39m: [ERROR[403]::CODE[3]: Usuario no autorizado. (Fallo en el rol) | ::[/api/auth/errorTest]
+[33merror[39m: [ERROR[403]::CODE[3]: Usuario no autorizado. (NO_SPECIFIC_WARNING) | ::[/chat]
+[33merror[39m: [ERROR[403]::CODE[3]: Usuario no autorizado. (Datos ya ocupados) | ::[/api/auth/register]
+[33merror[39m: [ERROR[400]::CODE[11]: Ingrese los demás campos. (email,password) | ::[/api/auth/login]
+[33merror[39m: [ERROR[403]::CODE[3]: Usuario no autorizado. (Error al iniciar sesión) | ::[/api/auth/login]
+[33merror[39m: [ERROR[403]::CODE[3]: Usuario no autorizado. (Datos ya ocupados) | ::[/api/auth/register]
+[33merror[39m: [ERROR[400]::CODE[11]: Ingrese los demás campos. (email,password) | ::[/api/auth/login]
+[33merror[39m: [ERROR[403]::CODE[3]: Usuario no autorizado. (Error al iniciar sesión) | ::[/api/auth/login]

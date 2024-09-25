@@ -1,9 +1,7 @@
 import fs from "fs";
-import { myProducts } from "../../mocks/index.js";
-import config from "../../config.js";
-import { generateRandomId } from "../utils.js";
-import { errorDictionary } from "../../config.js";
 import CustomError from "../custom.error.class.js";
+import config, { errorDictionary } from "../../config.js";
+import { generateRandomId } from "../utils.js";
 
 // Clase para controlar los métodos referentes a los productos.
 class ProductFSClass {
@@ -230,19 +228,6 @@ class ProductFSClass {
     }
   }
 };
-
-// Productos de ejemplo para agregar y probar el algoritmo.
-const [product1, product2, product3, productCambiado] = myProducts;
-
-// Métodos a utilizar:
-
-// Para productos:
-// exampleProductManager.addProduct();
-// exampleProductManager.getProducts();
-// exampleProductManager.getProductById();
-// exampleProductManager.deleteProductById();
-// exampleProductManager.updateProduct();
-// exampleProductManager.readFileAndSave();
 
 const ProductFSService = new ProductFSClass();
 

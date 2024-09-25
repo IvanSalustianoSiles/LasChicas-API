@@ -1,8 +1,5 @@
 import config from "../config.js";
-import ProductFSService from "../services/product/product.fs.dao.js";
-import ProductMDBService from "../services/product/product.mdb.dao.js";
-import { errorDictionary } from "../config.js";
-import CustomError from "../services/custom.error.class.js";
+import { ProductFSService, ProductMDBService, CustomError } from "../services/index.js";
 
 class ProductDTO {
   constructor() {

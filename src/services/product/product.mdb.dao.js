@@ -1,7 +1,6 @@
-import config from "../../config.js";
+import CustomError from "../custom.error.class.js";
 import { productsModel } from "../../models/products.model.js";
 import { errorDictionary } from "../../config.js";
-import CustomError from "../custom.error.class.js";
 
 class ProductMDBClass {
   constructor(model) {
@@ -188,9 +187,9 @@ class ProductMDBClass {
     } catch (error) {
       return undefined;
     }
-  }
+  };
 }
 
-const ProductMDBService = await new ProductMDBClass(productsModel);
+const ProductMDBService = new ProductMDBClass(productsModel);
 
 export default ProductMDBService;

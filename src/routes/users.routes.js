@@ -1,11 +1,8 @@
+import nodemailer from "nodemailer";
+import config, { errorDictionary } from "../config.js";
 import { Router } from "express";
 import { UserManager } from "../controllers/index.js";
-import { createHash, generateDateAndHour, generateRandomCode, isValidPassword, verifyMDBID } from "../services/index.js";
-import config from "../config.js";
-import { handlePolicies, uploader } from "../services/index.js";
-import { errorDictionary } from "../config.js";
-import nodemailer from "nodemailer";
-import CustomError from "../services/custom.error.class.js";
+import { createHash, generateDateAndHour, generateRandomCode, isValidPassword, verifyMDBID, CustomError, handlePolicies, uploader, routeDate, catchCall } from "../services/index.js";
 
 const router = Router();
 
@@ -22,21 +19,20 @@ router.get("/", async (req, res) => {
   try {
     const users = await UserManager.paginateUsers(req.query.limit, req.query.page, req.query.role, "/api/users"); 
     if (!users) throw new CustomError(errorDictionary.FOUND_USER_ERROR);
-    res.send({ status: 1, payload: users });
+    res.status(200).send({ origin: config.SERVER, payload: users });
   } catch (error){
-    return error;
-  }
+    throw error;
+  };
 });
-router.post("/", handlePolicies(["ADMIN"]), async (req, res) => {
+router.post("/", routeDate(), handlePolicies(["ADMIN"]), async (req, res) => {
   try {
     const process = await UserManager.addUser(req.body);
     if (!process) throw new CustomError(errorDictionary.ADD_DATA_ERROR, `Usuario`);
-    await req.logger.info(`${new Date().toDateString()} Usuario agregado. ${req.url}`);
-    res.status(200).send({ status: 1, payload: process });
+    await req.logger.warning(`${req.date} Usuario agregado desde ruta privada. ${req.url}`);
+    res.status(200).send({ origin: config.SERVER, payload: process });
   } catch (error) {
-    req.logger.error(`${new Date().toDateString()}; ${error}; ${req.url}`);
-    res.send({ origin: config.SERVER, status: error.status, type: error.type, message: error.message });
-}
+    throw error;
+  };
 });
 router.put("/:uid", handlePolicies(["ADMIN"]), verifyMDBID(["uid"]), async (req, res) => {
   try {
@@ -47,21 +43,19 @@ router.put("/:uid", handlePolicies(["ADMIN"]), verifyMDBID(["uid"]), async (req,
     if (!process) throw new CustomError(errorDictionary.UPDATE_DATA_ERROR, `Usuario`);
     res.status(200).send({ origin: config.SERVER, payload: process });
   } catch (error) {
-    req.logger.error(`${new Date().toDateString()}; ${error}; ${req.url}`);
-    res.send({ origin: config.SERVER, status: error.status, type: error.type, message: error.message });
-}
+    throw error;
+  };
 });
-router.delete("/:uid", handlePolicies(["ADMIN"]), verifyMDBID(["uid"]), async (req, res) => {
+router.delete("/:uid", routeDate(), handlePolicies(["ADMIN"]), verifyMDBID(["uid"]), async (req, res) => {
   try {
     const filter = { _id: req.params.uid };
     const process = await UserManager.deleteUser(filter);
     if (!process) throw new CustomError(errorDictionary.DELETE_DATA_ERROR, `Usuario`);
-    await req.logger.info(`${new Date().toDateString()} Usuario de ID ${req.params.uid} eliminado. ${req.url}`);
+    await req.logger.info(`${req.date} Usuario de ID ${req.params.uid} eliminado. ${req.url}`);
     res.status(200).send({ origin: config.SERVER, payload: process });
   } catch (error) {
-    req.logger.error(`${new Date().toDateString()}; ${error}; ${req.url}`);
-    res.send({ origin: config.SERVER, status: error.status, type: error.type, message: error.message });
-}
+    throw error;
+  };
 });
 router.post("/restore", async (req, res) => {
   try {
@@ -93,11 +87,10 @@ router.post("/restore", async (req, res) => {
       </div>`
     });
   } catch (error) {
-    req.logger.error(`${new Date().toDateString()}; ${error}; ${req.url}`);
-    res.send({ origin: config.SERVER, error: error});
-}
+    throw error;
+  };
 });
-router.post("/restorecallback", async (req, res) => {
+router.post("/restorecallback", routeDate(), async (req, res) => {
   try {
 
     if (!req.session.secretCode || !req.session.temporalEmail) res.redirect(`/restore?error=${encodeURI(`Acceso denegado: Probablemente su link caducó.`)}`);
@@ -105,7 +98,6 @@ router.post("/restorecallback", async (req, res) => {
     const { password } = req.body;    
 
     const user = await UserManager.findUser({email: req.session.temporalEmail });
-
     
     const validationPass = isValidPassword(user, password);
     
@@ -117,15 +109,12 @@ router.post("/restorecallback", async (req, res) => {
 
     
     if (!updatedUser) throw new CustomError(errorDictionary.UPDATE_DATA_ERROR, "Usuario");
-    
     req.session.user = updatedUser;
-
     res.redirect(`/profile?warning=${encodeURI(`Contraseña cambiada con éxito.`)}`);
-    
+    req.logger.warning(`${req.date} Usuario "${req.session.user.email}" cambió su contraseña; Sesión almacenada. | ::[${req.url}]`)
   } catch (error) {
-    req.logger.error(`${new Date().toDateString()}; ${error}; ${req.url}`);
-    res.send({ origin: config.SERVER, error: error});
-  }
+    throw error;
+  };
 });
 router.post("/premium/:uid", handlePolicies(["ADMIN"]), verifyMDBID(["uid"]), async (req, res) => {
   try {
@@ -141,15 +130,17 @@ router.post("/premium/:uid", handlePolicies(["ADMIN"]), verifyMDBID(["uid"]), as
       if (!myUser.status) throw new CustomError(errorDictionary.AUTHORIZE_USER_ERROR, "El usuario posee documentos insuficientes para cambiar de rol");
       const updateOne = await UserManager.updateUser({_id: myUser._id}, {role: "premium"});
       if (!updateOne) throw new CustomError(errorDictionary.FOUND_USER_ERROR);
-      res.send({ origin: config.SERVER, payload: `Rol de usuario ${myUser.first_name} ${myUser.last_name} actualizado a ${updateOne.role}.`})
+      req.logger.warning(`Rol de usuario ${myUser.email} cambiado a ${updateOne.role}. Procura que no sea un error. | ::${req.url}`);
+      res.status(200).send({ origin: config.SERVER, payload: `Rol de usuario ${myUser.first_name} ${myUser.last_name} actualizado a ${updateOne.role}.`})
     } else {
       const updateTwo = await UserManager.updateUser({_id: myUser._id}, {role: "user"});
       if (!updateTwo) throw new CustomError(errorDictionary.FOUND_USER_ERROR);
-      res.send({ origin: config.SERVER, payload: `Rol de usuario ${myUser.first_name} ${myUser.last_name} actualizado a ${updateTwo.role}.`})
+      req.logger.warning(`Rol de usuario ${myUser.email} cambiado a ${updateTwo.role}. Procura que no sea un error. | ::${req.url}`);
+      res.status(200).send({ origin: config.SERVER, payload: `Rol de usuario ${myUser.first_name} ${myUser.last_name} actualizado a ${updateTwo.role}.`})
     }
   } catch (error) {
-    res.send({ origin: config.SERVER, error: error });
-  }
+    throw error;
+  };
 });
 router.post("/:uid/documents", uploader.array("docs"), handlePolicies(["USER", "PREMIUM", "ADMIN"]), verifyMDBID(["uid"], { compare: "USER" }), async (req, res) => {
   try {
@@ -161,13 +152,12 @@ router.post("/:uid/documents", uploader.array("docs"), handlePolicies(["USER", "
     const addingFiles = await UserManager.addFiles(uid, req.files);
     if (!addingFiles) throw new CustomError(errorDictionary.ADD_DATA_ERROR, "Usuario");
   } catch (error) {
-    res.send({ origin: config.SERVER, error: `[ERROR::${error.type.status}; CODE::${error.type.code}]: ${error.type.message}`});
-  }
+    throw error;
+  };
 });
 router.delete("/", handlePolicies(["ADMIN"]), async (req, res) => {
   try {    
     const deletedUsers = await UserManager.deleteAllInactiveUsers(1000 * 60 * 60 * 48);
-    
     if (!deletedUsers) throw new CustomError(errorDictionary.DELETE_DATA_ERROR, "Usuarios");
     deletedUsers.forEach( async (user) => {
       let userEmail = user.email;
@@ -186,9 +176,12 @@ router.delete("/", handlePolicies(["ADMIN"]), async (req, res) => {
         </div>`
       });
     });
-    res.send({ origin: config.SERVER, payload: deletedUsers });
+    req.logger.warning(`Usuarios inactivos eliminados. Procura que no sea un error. | ::${req.url}`);
+    res.status(200).send({ origin: config.SERVER, payload: deletedUsers });
   } catch (error) {
-    res.send({ origin: config.SERVER, error: `[ERROR::${error.type.status}; CODE::${error.type.code}]: ${error.type.message}`});
-  }
+    throw error;
+  };
 });
+catchCall(router, "usuarios");
+
 export default router;

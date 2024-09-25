@@ -1,56 +1,11 @@
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import config from "../config.js";
 import CustomError from "./custom.error.class.js";
 import { errorDictionary } from "../config.js";
 import { faker } from "@faker-js/faker";
 
-export const catchCall = (router, text) => {
-  return router.all("*", async (req, res) => {
-    throw new CustomError(errorDictionary.GENERAL_FOUND_ERROR, `No se encontró la ruta de ${text} especificada`);
-  });
-};
-export const createHash = (password) => {
-  return bcrypt.hashSync(password, bcrypt.genSaltSync(10));
-};
-export const isValidPassword = (user, password) => { 
-  try {    
-    return bcrypt.compareSync(password, user.password);
-  } catch (error) {
-    return null;
-  }
-};
-export const createToken = (payload, duration) => {
-  try {
-    jwt.sign(payload, config.SECRET, { expiresIn: duration });
-  } catch (error) {
-    throw new CustomError(errorDictionary.GENERATE_DATA_ERROR, "Token");
-  }
-};
-export const verifyAndReturnToken = (req, res) => {
-  try {
-    let sendToken;
-  const headerToken = req.headers.authorization
-    ? req.headers.authorization.split(" ")[1]
-    : undefined;
-  const cookieToken =
-    req.cookies && req.cookies[`${config.APP_NAME}_cookie`]
-      ? req.cookies[`${config.APP_NAME}_cookie`]
-      : undefined;
-  const queryToken = 
-    req.query.access_token 
-      ? req.query.access_token 
-      : undefined;
-  const myToken = headerToken || cookieToken || queryToken;
-  if (!myToken) return null;
-  jwt.verify(myToken, config.SECRET, (err, payload) => {
-    err ? sendToken = null : sendToken = payload;
-  });
-  return sendToken;
-  } catch (error) {
-    throw new CustomError(errorDictionary.UNHANDLED_ERROR, `${error}`);
-  }
-};
+// Middlewares
+
 export const verifyMDBID = (ids, check = undefined) => {
   return (req, res, next) => {
     try {
@@ -63,8 +18,7 @@ export const verifyMDBID = (ids, check = undefined) => {
       }
       next();
     } catch (error) {
-      res.send(error);
-      // res.send({ origin: config.SERVER, error: `[ERROR::${error.type.status}; CODE::${error.type.code}]: ${error.type.message}`});
+      throw error;
     } 
   }
 };
@@ -86,9 +40,88 @@ export const verifyRequiredBody = (requiredFields) => {
       if (!allOk) throw new CustomError(errorDictionary.FEW_PARAMS_ERROR, `${requiredFields}`);   
       next();
     } catch (error) {
-      throw new CustomError(error.type, error.message);
+      throw error;
     }
   };
+};
+export const handlePolicies = (policies) => {
+  return (req, res, next) => {
+    try {   
+      if (policies[0] === "PUBLIC") return next();
+      let user = req.session.user;
+      if (!user) res.redirect("/login");
+      let role = user.role.toUpperCase();   
+      if (!policies.includes(role)) throw new CustomError(errorDictionary.AUTHORIZE_USER_ERROR);
+      req.user = user;
+      next();
+    } catch (error) {
+      throw error;
+    }
+  }
+};
+export const verifyRestoreCode = () => {
+  return (req, res, next) => {
+    try {
+      if (!req.session) throw new CustomError(errorDictionary.AUTHENTICATE_USER_ERROR, `Faltan datos de sesión`);
+      if (req.session.secretCode && (req.session.secretCode != req.params.code)) throw new CustomError(errorDictionary.AUTHORIZE_USER_ERROR, "Acceso denegado: Probablemente su link caducó.");
+      next();
+    } catch (error) {
+      res.redirect(`/restore?error=${encodeURI(`${error.message}`)}`);
+    }
+  }
+};
+export const routeDate = () => {
+  return (req, res, next) => {
+    try {
+      const routeDate = new Date();
+      if (!routeDate) throw new CustomError(errorDictionary.GENERATE_DATA_ERROR, "Fecha");
+      req.date = routeDate;
+      next();
+    } catch (error) {
+      throw error;
+    }
+  }
+};
+export const regularCleanUp = (controller) => {
+  return (req, res, next) => {
+    try {
+      setInterval(async () => {
+        const aYearAgo = new Date();
+        aYearAgo.setFullYear(aYearAgo.getFullYear() - 1);
+        const updatedUsers = await controller.updateUser({ last_connection: { $lt: aYearAgo } }, { active: false }, { multi: true, new: true });
+        if (!updatedUsers) throw new CustomError(errorDictionary.UPDATE_DATA_ERROR, "Usuarios inactivos para actualizar no encontrados");
+      }, 1000 * 60 * 60 * 24);
+      next();
+    } catch (error) {
+      req.logger.warning(`[ERROR[${error.status}]::CODE[${error.code}]: (${error.message ? error.message : "NO_SPECIFIC_WARNING"}) | ::[${req.url ? req.url : "UNKNOWN_LOCATION"}]`);
+    }
+  }
+};
+
+// No Middlewares
+
+export const catchCall = (router, text) => {
+  return router.all("*", async (req, res) => {
+    throw new CustomError(errorDictionary.GENERAL_FOUND_ERROR, `No se encontró la ruta de ${text} especificada`);
+  });
+};
+export const createHash = (password) => {
+  try {
+    const validation = bcrypt.hashSync(password, bcrypt.genSaltSync(10));
+    if (!validation) throw new CustomError(errorDictionary.GENERATE_DATA_ERROR, "Contraseña");
+    return validation;
+  } catch (error) {
+    return undefined; 
+  }
+};
+export const isValidPassword = (user, password) => { 
+  try {    
+    const compare = bcrypt.compareSync(password, user.password);
+    if (!compare) throw new CustomError(errorDictionary.AUTHORIZE_PASS_ERROR);
+    return compare;
+  } catch (error) {
+    return undefined;
+  }
 };
 export const generateRandomId = () => {
   try {
@@ -102,22 +135,6 @@ export const generateRandomId = () => {
     return charArray.join("");
   } catch (error) {
     throw new CustomError(errorDictionary.GENERATE_DATA_ERROR, "Random_ID");
-  }
-};
-export const handlePolicies = (policies) => {
-  return (req, res, next) => {
-    try {   
-      if (policies[0] === "PUBLIC") return next();
-      
-      let user = req.session.user;
-      if (!user) res.redirect("/login");
-      let role = user.role.toUpperCase();   
-      if (!policies.includes(role)) throw new CustomError(errorDictionary.AUTHORIZE_USER_ERROR);
-      req.user = user;
-      next();
-    } catch (error) {
-      throw new CustomError(errorDictionary.AUTHORIZE_USER_ERROR, "Fallo en el rol");
-    }
   }
 };
 export const generateRandomCode = (codeLength = 12) => {
@@ -144,57 +161,23 @@ export const generateDateAndHour = () => {
 
 };
 export const generateFakeProducts = async (quantity) => {
-  const products = [];
-  const categories = ["buzos", "camperas", "termos", "sabanas"];
-  const statusArray = [true, false];
-  for (let i = 0; i < quantity; i++) {
-    const title = `${faker.commerce.productAdjective()} ${faker.commerce.product()} por ${faker.person.fullName()}`;
-    const description = faker.commerce.productDescription();
-    const price = Math.floor(faker.number.float({min: 500, max: 200000}));
-    const code = Math.floor(faker.number.float({min: 1000, max: 8000}));
-    const stock = Math.floor(faker.number.float({min: 0, max: 3000}));
-    const category = categories[Math.floor(Math.random() * categories.length)];
-    const status = statusArray[Math.floor(Math.random() * statusArray.length)];
-    const thumbnail = faker.image.urlPlaceholder();
-    products.push({ title, description, price, code, stock, category, status, thumbnail })
-  };
-  return products;
-};
-export const verifyRestoreCode = () => {
-  return (req, res, next) => {
-    try {
-      if (!req.session) throw new CustomError(errorDictionary.AUTHENTICATE_USER_ERROR, `Faltan datos de sesión`);
-      if (req.session.secretCode != req.params.code) throw new CustomError(errorDictionary.AUTHORIZE_USER_ERROR, "Acceso denegado: Probablemente su link caducó.");
-      next();
-    } catch (error) {
-      res.redirect(`/restore?error=${encodeURI(`${error.message}`)}`);
-    }
-  }
-};
-export const routeDate = () => {
-  return (req, res, next) => {
-    try {
-      const routeDate = new Date();
-      if (!routeDate) throw new CustomError(errorDictionary.GENERATE_DATA_ERROR, "Fecha");
-      req.date = routeDate;
-      next();
-    } catch (error) {
-      req.logger.error(`[DATE::FAILURE]; ${error}; ${req.url}`);
-      return res.status(500).send(error);
-    }
-  }
-};
-export const regularCleanUp = (controller) => {
-  return (req, res, next) => {
-    try {
-      setInterval(async () => {
-        const aYearAgo = new Date();
-        aYearAgo.setFullYear(aYearAgo.getFullYear() - 1);
-        await controller.updateUser({ last_connection: { $lt: aYearAgo } }, { active: false }, { multi: true, new: true });
-      }, 1000 * 60 * 60 * 24);
-      next();
-    } catch (error) {
-      req.logger.error(`${new Date()}; ${error}; ${req.url}`);
-    }
+  try {
+    const products = [];
+    const categories = ["buzos", "camperas", "termos", "sabanas"];
+    const statusArray = [true, false];
+    for (let i = 0; i < quantity; i++) {
+      const title = `${faker.commerce.productAdjective()} ${faker.commerce.product()} por ${faker.person.fullName()}`;
+      const description = faker.commerce.productDescription();
+      const price = Math.floor(faker.number.float({min: 500, max: 200000}));
+      const code = Math.floor(faker.number.float({min: 1000, max: 8000}));
+      const stock = Math.floor(faker.number.float({min: 0, max: 3000}));
+      const category = categories[Math.floor(Math.random() * categories.length)];
+      const status = statusArray[Math.floor(Math.random() * statusArray.length)];
+      const thumbnail = faker.image.urlPlaceholder();
+      products.push({ title, description, price, code, stock, category, status, thumbnail })
+    };
+    return products;
+  } catch (error) {
+    throw new CustomError(errorDictionary.GENERATE_DATA_ERROR, "Usuarios de prueba");
   }
 };

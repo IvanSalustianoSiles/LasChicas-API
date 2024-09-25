@@ -6,23 +6,47 @@
         <h2>Productos</h2>
         <div>
             {{#each toSendObject}}
-                <div>
+                <div class="product">
                     <h2>{{title}}</h2>
                     <img src={{thumbnail}} alt={{title}}>
                     <h3>${{price}}</h3>
                     <h4>Categoría: {{category}}</h4>
                     <p>{{description}}</p>
                     <h4>Cantidad: {{quantity}}, máximo {{stock}}</h4>
-                </div>
-                <div>
-                    <h2>ID del producto: {{_id}}</h2>
+                    <button class="prodButton">Eliminar del carrito</button>
+                    <div style="display: none;" id="hideDivId">{{_id}}</div>
                 </div>
                 <hr>      
             {{/each}}
         </div>
+        <button onclick="cleanCart()">Vaciar carrito</button>
         <button onclick="window.location.replace(`{{purchaseAction}}`)">Finalizar la compra</button>
     {{/if}}
     <button onclick="window.location.replace(`/products`)">Más productos</button>
     <button onclick="window.location.replace(`/profile`)">Tu perfil</button>
 </div>
-<script></script>
+<script>
+    products = document.querySelectorAll(".product");
+    let buttons = document.querySelectorAll(".prodButton");
+
+    buttons.forEach((button, i) => {
+        let pid = products[i].children[7].textContent;
+        button.addEventListener("click", () => {
+            fetch(`{{deleteProductAction}}/${pid}`, {
+                method: "DELETE",
+                body: {}
+            }).then((res) => {
+                window.location.reload();
+            });
+        });
+    });
+
+    const cleanCart = () => {
+        fetch(`{{cleanAction}}`, {
+            method: "DELETE",
+            body: {}
+        }).then((res) => {
+            window.location.reload();
+        });
+    };
+</script>

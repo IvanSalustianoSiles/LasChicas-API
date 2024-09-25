@@ -1,7 +1,6 @@
-import config from "../../config.js";
+import CustomError from "../custom.error.class.js";
 import { ticketsModel } from "../../models/tickets.model.js";
 import { errorDictionary } from "../../config.js";
-import CustomError from "../custom.error.class.js";
 
 class TicketMDBClass {
   constructor(model) {
@@ -10,11 +9,10 @@ class TicketMDBClass {
   createTicket = async (ticketData) => {
     try {
       const ticketGen = await ticketsModel.create(ticketData);
-      
       if (!ticketGen) throw new CustomError(errorDictionary.GENERATE_DATA_ERROR, `Ticket`);
       return JSON.parse(JSON.stringify(ticketGen._id));
     } catch (error) {
-      throw new CustomError(error.type, `[Service::MDB]: ${error.message}`);
+      return undefined;
     }
   };
   getTicket = async (tid) => {
@@ -23,7 +21,7 @@ class TicketMDBClass {
       if (!ticket) throw new CustomError(errorDictionary.GENERAL_FOUND_ERROR, `Ticket`);
       return ticket;
     } catch (error) {
-      throw new CustomError(error.type, `[Service::MDB]: ${error.message}`);
+      return undefined;
     };
   };
   getAllTickets = async () => {
@@ -32,7 +30,7 @@ class TicketMDBClass {
       if (!tickets) throw new CustomError(errorDictionary.GENERAL_FOUND_ERROR, `Tickets`);
       return tickets;
     } catch (error) {
-      throw new CustomError(error.type, `[Service::MDB]: ${error.message}`);
+      return undefined;
     };
   };
 };

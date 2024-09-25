@@ -1,11 +1,8 @@
-import { Router } from "express";
-import { uploader } from "../services/index.js";
-import { ProductManager, UserManager } from "../controllers/index.js";
-import { verifyMDBID, catchCall, handlePolicies, generateFakeProducts } from "../services/index.js";
-import { errorDictionary } from "../config.js";
-import CustomError from "../services/custom.error.class.js";
 import nodemailer from "nodemailer";
-import config from "../config.js";
+import config, { errorDictionary } from "../config.js";
+import { Router } from "express";
+import { ProductManager } from "../controllers/index.js";
+import { verifyMDBID, catchCall, handlePolicies, CustomError, uploader, routeDate } from "../services/index.js";
 
 const router = Router();
 let toSendObject = {};
@@ -56,24 +53,21 @@ router.get("/", async (req, res) => {
       "/api/products"
     );
     if (!toSendObject) throw new CustomError(errorDictionary.GENERAL_FOUND_ERROR, "Productos");
-    res.send(toSendObject);
+    res.status(200).send(toSendObject);
   } catch (error) {
-    req.logger.error(`${new Date().toDateString()}; ${error}; ${req.url}`);
-    res.send({ origin: config.SERVER, status: error.status, type: error.type, message: error.message });
-}
+    throw error;
+  };
 });
 router.get("/:pid", handlePolicies(["ADMIN"]), verifyMDBID(["pid"]), async (req, res) => {
   try {
-      if (!req.params.pid) throw new CustomError(errorDictionary.FOUND_ID_ERROR, `${req.params.pid}`);
       toSendObject = await ProductManager.getProductById(req.params.pid);
       if (!toSendObject) throw new CustomError(errorDictionary.GENERAL_FOUND_ERROR, "Producto");
       res.status(200).send(toSendObject);
   } catch (error) {
-    req.logger.error(`${new Date().toDateString()}; ${error}; ${req.url}`);
-    res.send({ origin: config.SERVER, status: error.status, type: error.type, message: error.message });
-}
+    throw error;
+  };
 });
-router.post("/", handlePolicies(["ADMIN", "PREMIUM"]), productPolicies(["ADMIN", "PREMIUM"]), uploader.single("thumbnail"), async (req, res) => {
+router.post("/", routeDate(), handlePolicies(["ADMIN", "PREMIUM"]), productPolicies(["ADMIN", "PREMIUM"]), uploader.single("products"), async (req, res) => {
   try {
     toSendObject = await ProductManager.addProducts({
       ...req.body,
@@ -81,31 +75,29 @@ router.post("/", handlePolicies(["ADMIN", "PREMIUM"]), productPolicies(["ADMIN",
       status: true,
     });
     if (!toSendObject) throw new CustomError(errorDictionary.ADD_DATA_ERROR, "productos");
-    await req.logger.info(`${new Date().toDateString()} Producto(s) agregado(s) al sistema por "${req.session.user.first_name}". ${req.url}`);
-    res.send(toSendObject);
+    await req.logger.info(`${req.date} Producto(s) agregado(s) al sistema por "${req.session.user.first_name}". | ::${req.url}`);
+    res.status(200).send(toSendObject);
   } catch (error) {
-    req.logger.error(`${new Date().toDateString()}; ${error}; ${req.url}`);
-    res.send({ origin: config.SERVER, status: error.status, type: error.type, message: error.message });
-}
+    throw error;
+  };
 });
-router.put("/:pid", handlePolicies(["ADMIN", "PREMIUM"]), productPolicies(["ADMIN", "PREMIUM"]), verifyMDBID(["pid"]), async (req, res) => {
+router.put("/:pid", routeDate(), handlePolicies(["ADMIN", "PREMIUM"]), productPolicies(["ADMIN", "PREMIUM"]), verifyMDBID(["pid"]), async (req, res) => {
   try {
     const { pid } = req.params;
     toSendObject = await ProductManager.updateProductById(pid, req.body);
     if (!toSendObject) throw new CustomError(errorDictionary.UPDATE_DATA_ERROR, `Producto`);
-    await req.logger.info(`${new Date().toDateString()} Producto de ID ${pid} actualizado. ${req.url}`);
-    res.send(toSendObject);
+    await req.logger.info(`${req.date} Producto de ID ${pid} actualizado. | ::${req.url}`);
+    res.status(200).send(toSendObject);
   } catch (error) {
-    req.logger.error(`${new Date().toDateString()}; ${error}; ${req.url}`);
-    res.send({ origin: config.SERVER, status: error.status, type: error.type, message: error.message });
-}
+    throw error;
+  };
 });
-router.delete("/:pid", handlePolicies(["ADMIN", "PREMIUM"]), productPolicies(["ADMIN", "PREMIUM"]), verifyMDBID(["pid"]), async (req, res) => {
+router.delete("/:pid", routeDate(), handlePolicies(["ADMIN", "PREMIUM"]), productPolicies(["ADMIN", "PREMIUM"]), verifyMDBID(["pid"]), async (req, res) => {
   try {
     const { pid } = req.params;
     toSendObject = await ProductManager.deleteProductById(pid);
     if (!toSendObject) throw new CustomError(errorDictionary.DELETE_DATA_ERROR, `Producto`);
-    await req.logger.info(`${new Date().toDateString()} Producto de ID ${pid} eliminado. ${req.url}`);
+    await req.logger.info(`${req.date} Producto de ID ${pid} eliminado. | ::${req.url}`);
     if (toSendObject.owner != "admin") {
       const email = await transport.sendMail({
         from: `Las Chicas <${config.GMAIL_APP_USER}>`, 
@@ -120,11 +112,10 @@ router.delete("/:pid", handlePolicies(["ADMIN", "PREMIUM"]), productPolicies(["A
         </div>`
       }); 
     }
-    res.send(toSendObject);
+    res.status(200).send(toSendObject);
   } catch (error) {
-    req.logger.error(`${new Date().toDateString()}; ${error}; ${req.url}`);
-    res.send({ origin: config.SERVER, status: error.status, type: error.type, message: error.message });
-  }
+    throw error;
+  };
 });
 catchCall(router, "productos");
 

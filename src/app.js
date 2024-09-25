@@ -13,6 +13,7 @@ import UserManager from "./controllers/user.controller.js";
 import { CLOptions } from "./config.js";
 import { initSocket, errorHandler, addLogger, regularCleanUp, MongoSingleton }  from "./services/index.js";
 import { productRoutes, cartRoutes, viewRoutes, userRoutes, authRoutes } from "./routes/index.js";
+
 // Server init
 const app = express();
 const httpServer = app.listen(config.PORT, async () => {

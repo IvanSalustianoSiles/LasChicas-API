@@ -1,9 +1,7 @@
 import fs from "fs";
-import { myCarts, myProducts } from "../../mocks/index.js";
-import { generateRandomId } from "../utils.js";
-import { errorDictionary } from "../../config.js";
-import config from "../../config.js";
 import CustomError from "../custom.error.class.js";
+import config, { errorDictionary } from "../../config.js";
+import { generateRandomId } from "../utils.js";
 
 // Clase para controlar los métodos referentes a los carritos.
 class CartFSClass {
@@ -227,29 +225,6 @@ class CartFSClass {
     }
   };
 };
-
-// Carritos y productos de ejemplo para agregar y probar el algoritmo.
-const [cart1, cart2, cart3, cart4] = myCarts;
-const [product1, product2, product3, productCambiado] = myProducts;
-
-// Métodos a utilizar:
-
-// Para productos:
-// exampleProductManager.addProduct();
-// exampleProductManager.getProducts();
-// exampleProductManager.getProductById();
-// exampleProductManager.deleteProductById();
-// exampleProductManager.updateProduct();
-// exampleProductManager.readFileAndSave();
-
-// Para carritos:
-// exampleCartManager.createCart();
-// exampleCartManager.getProdsOfCartById();
-// exampleCartManager.addProduct();
-// exampleCartManager.updateFile();
-// exampleCartManager.readFileAndSave();
-
-// CartManager de ejemplo para probar el algoritmo.
 
 const CartFSService = new CartFSClass();
 

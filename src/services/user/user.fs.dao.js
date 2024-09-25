@@ -1,7 +1,6 @@
-import config from "../../config.js";
-import { errorDictionary } from "../../config.js";
 import CustomError from "../custom.error.class.js";
 import fs from "fs";
+import config, { errorDictionary } from "../../config.js";
 import { cartsModel } from "../../models/carts.model.js";
 import { generateRandomId } from "../utils.js";
 
@@ -72,9 +71,9 @@ class UserFSClass {
         let filterValue = Object.values(filter)[i];
         let filterProp = Object.keys(filter)[i];
         this.userArray = this.userArray.filter(user => user[filterProp] == filterValue);
-        if (filterValue.less) {
+        if (filterValue.$lt) {
           this.userArray = this.userArray.filter(user => user[filterProp] < filterValue.less);
-        } else if (filterValue.greater) {
+        } else if (filterValue.$gt) {
           this.userArray = this.userArray.filter(user => user[filterProp] > filterValue.greater);
         } else {
           this.userArray = this.userArray.filter(user => user[filterProp] == filterValue);
@@ -131,9 +130,9 @@ class UserFSClass {
       for (let i = 0; i < Object.values(filter).length; i++) {
         let filterValue = Object.values(filter)[i];
         let filterProp = Object.keys(filter)[i];
-        if (filterValue.less) {
+        if (filterValue.$lt) {
           this.userArray = this.userArray.filter(user => user[filterProp] < filterValue.less);
-        } else if (filterValue.greater) {
+        } else if (filterValue.$gt) {
           this.userArray = this.userArray.filter(user => user[filterProp] > filterValue.greater);
         } else {
           this.userArray = this.userArray.filter(user => user[filterProp] == filterValue);
@@ -274,7 +273,7 @@ class UserFSClass {
     try {
       const limitDate = new Date();
       limitDate.setDate(limitDate.getDate() - timeForDelete / 1000 / 60 / 60 / 24);
-      const deletedUsers = await this.deleteUser({ last_connection: { less: limitDate }}, { multi: true });
+      const deletedUsers = await this.deleteUser({ last_connection: { $lt: limitDate }}, { multi: true });
       if (!deletedUsers) throw new CustomError(errorDictionary.DELETE_DATA_ERROR, "Usuarios");
       return deletedUsers;
     } catch (error) {
@@ -282,18 +281,6 @@ class UserFSClass {
     }
   };
 };
-
-// Métodos a utilizar:
-// isRegistered (focusRoute, returnObject, req, res)
-// isRegisteredwToken (focusRoute, returnObject, req, res)
-// findUser (filter)
-// addUser (user)
-// updateUser (filter, update, options)
-// deleteUser (filter)
-// paginateUsers (...filters)
-// updateFile (array)
-// readFileAndSave()
-// addFiles (uid, files)
 
 const UserFSService = new UserFSClass();
 

@@ -1,7 +1,5 @@
 import config from "../config.js";
-import { generateDateAndHour, generateRandomCode, TicketMDBService, TicketFSService } from "../services/index.js";
-import { errorDictionary } from "../config.js";
-import CustomError from "../services/custom.error.class.js";
+import { generateDateAndHour, generateRandomCode, TicketMDBService, TicketFSService, CustomError } from "../services/index.js";
 
 class TicketDTO {
   constructor() {
@@ -31,21 +29,21 @@ class TicketManagerClass {
       const normalizedData = await DTO.addAutoGenerate(ticketData);
       return await this.service.createTicket(normalizedData);
     } catch (error) {
-      throw new CustomError(error.type, `[createTicket]: ${error.message}`);
+      return undefined;
     }
   };
   getTicket = async (tid) => {
     try {
       return await this.service.getTicket(tid);
     } catch (error) {
-      throw new CustomError(error.type, `[getTicket]: ${error.message}`);
+      return undefined;
     };
   };
   getAllTickets = async () => {
     try {
       return await this.service.getAllTickets();
     } catch (error) {
-      throw new CustomError(error.type, `[getAllTickets]: ${error.message}`);
+      return undefined;
     };
   };
 };

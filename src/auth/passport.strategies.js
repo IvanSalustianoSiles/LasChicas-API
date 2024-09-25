@@ -1,16 +1,11 @@
 import passport from "passport";
 import local from "passport-local";
 import GitHubStrategy from "passport-github2";
-import jwt from "passport-jwt";
+import config, { errorDictionary } from "../config.js";
 import { CartManager, UserManager } from "../controllers/index.js";
-import { isValidPassword, createHash } from "../services/index.js";
-import config from "../config.js";
-import CustomError from "../services/custom.error.class.js";
-import { errorDictionary } from "../config.js";
+import { isValidPassword, createHash, CustomError } from "../services/index.js";
 
 const localStrategy = local.Strategy;
-const jwtStrategy = jwt.Strategy;
-const jwtExtractor = jwt.ExtractJwt;
 
 const initAuthStrategies = () => {
   passport.use(

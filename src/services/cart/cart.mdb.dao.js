@@ -1,6 +1,6 @@
+import CustomError from "../custom.error.class.js";
 import { cartsModel } from "../../models/index.js";
 import { errorDictionary } from "../../config.js";
-import CustomError from "../custom.error.class.js";
 
 class CartMDBClass {
   constructor(model) {

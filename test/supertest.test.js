@@ -3,16 +3,16 @@ import supertest from "supertest";
 import { UserManager } from "../src/controllers/index.js";
 import mongoose from "mongoose";
 import config from "../src/config.js";
-
-const connection = mongoose.connect(config.MONGO_URI);
 const expect = chai.expect;
 const requester = supertest("http://localhost:8080");
 const testUser = { first_name: "Jerry", last_name: "Smith", password: "Coki2011", email: "jerrysmith@gmail.com" };
 let cookie = {};
 let userId;
 
-describe("Test Integración Users", function() {
-    before(function() {});
+describe("Test Integración Autenticación de usuario", function() {
+    before(async function() {
+        const connection = await mongoose.connect(config.MONGO_URI);
+    });
     beforeEach(function() {});
     after(function() {
         UserManager.deleteUser({ _id: userId });
@@ -72,6 +72,7 @@ describe("Test Integración Users", function() {
     });
     it("GET api/auth/logout | Debe fallar al intentar destruir una sesión inexistente y retornar un error", async function() {
         const { _body } = await requester.get("/api/auth/logout") 
+        console.log(_body)
         expect(_body).to.be.ok;     
         expect(_body.type).to.be.ok;      
         expect(_body.type).to.be.have.property("code", 9);

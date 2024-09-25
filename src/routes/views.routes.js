@@ -1,23 +1,20 @@
+import config, { errorDictionary } from "../config.js";
 import { Router } from "express";
-import { handlePolicies, uploader, generateFakeProducts, verifyRestoreCode, verifyMDBID } from "../services/index.js";
-import config from "../config.js";
-import {
-  CartManager,
-  ProductManager,
-  UserManager,
-} from "../controllers/index.js";
-import { errorDictionary } from "../config.js";
-import CustomError from "../services/custom.error.class.js";
+import { handlePolicies, generateFakeProducts, verifyRestoreCode, verifyMDBID, CustomError, routeDate, catchCall } from "../services/index.js";
+import { CartManager, ProductManager, UserManager } from "../controllers/index.js";
 
-let toSendObject = {};
 const router = Router();
 
 router.get("/", async (req, res) => {
-  let sessionActive = false;
-  let name = req.session.user ? req.session.user.first_name : "usuario";
-  if (req.session.user) sessionActive = true; 
-  res.render("init", { sessionActive: sessionActive, name: name });
-})
+  try {
+    let sessionActive = false;
+    let name = req.session.user ? req.session.user.first_name : "usuario";
+    if (req.session.user) sessionActive = true; 
+    res.render("init", { sessionActive: sessionActive, name: name });
+  } catch (error) {
+    throw error;
+  };
+});
 router.get("/products", handlePolicies(["USER", "PREMIUM", "ADMIN"]), async (req, res) => {
   try {
     let paginated = await ProductManager.getPaginatedProducts( req.query.limit, req.query.page, req.query.query, req.query.sort, req.query.available, "/products");
@@ -46,9 +43,8 @@ router.get("/products", handlePolicies(["USER", "PREMIUM", "ADMIN"]), async (req
         cartAction: `/api/carts/${req.session.user.cart}/product`
       });
   } catch (error) {
-    req.logger.error(`${new Date().toDateString()}; ${error}; ${req.url}`);
-    res.send({ origin: config.SERVER, status: error.status, type: error.type, message: error.message });
-  }
+    throw error;
+  };
 });
 router.get("/carts/:cid", handlePolicies(["USER", "PREMIUM", "ADMIN"]), verifyMDBID(["cid"], { compare: "CART" }), async (req, res) => {
   try {
@@ -60,27 +56,24 @@ router.get("/carts/:cid", handlePolicies(["USER", "PREMIUM", "ADMIN"]), verifyMD
     let voidWarning = false;
     if (toSendObject.length == 0) voidWarning = true;
     if (!toSendObject) throw new CustomError(errorDictionary.GENERAL_FOUND_ERROR, `Productos del carrito`);
-    res.render("cart", { toSendObject: toSendObject, voidWarning: voidWarning, purchaseAction: `/api/carts/${cid}/purchase` });
+    res.render("cart", { toSendObject: toSendObject, voidWarning: voidWarning, purchaseAction: `/api/carts/${cid}/purchase`, deleteProductAction: `/api/carts/${cid}/product`, cleanAction: `/api/carts/${cid}` });
   } catch (error) {
-    req.logger.error(`${new Date().toDateString()}; ${error}; ${req.url}`);
-    res.send({ origin: config.SERVER, status: error.status, type: error.type, message: error.message });
-}
+    throw error;
+  };
 });
 router.get("/chat", handlePolicies(["USER"]), async (req, res) => {
   try {
     res.render("chat", {});
   } catch (error) {
-    req.logger.error(`${new Date().toDateString()}; ${error}; ${req.url}`);
-    res.send({ origin: config.SERVER, status: error.status, type: error.type, message: error.message });
-  }
+    throw error;
+  };
 });
 router.get("/login", async (req, res) => {
   try {
     !req.session.user ? res.render("login", { postAction: "/api/auth/login", hrefReg: "/register", showError: req.query.error ? true : false, errorMessage: req.query.error }) : res.redirect("/profile");
   } catch (error) {
-    req.logger.error(`${new Date().toDateString()}; ${error}; ${req.url}`);
-    res.send({ origin: config.SERVER, status: error.status, type: error.type, message: error.message });
-}
+    throw error;
+  };
 });
 router.get("/register", (req, res) => {
   try {
@@ -88,17 +81,15 @@ router.get("/register", (req, res) => {
     ? res.render("register", { postAction: "/api/auth/register", hrefLog: "/login", showError: req.query.error ? true : false, errorMessage: req.query.error })
     : res.redirect("/profile");
   } catch (error) {
-    req.logger.error(`${new Date().toDateString()}; ${error}; ${req.url}`);
-    res.send({ origin: config.SERVER, status: error.status, type: error.type, message: error.message });
-}
+    throw error;
+  };
 });
 router.get("/profile", handlePolicies(["USER", "PREMIUM", "ADMIN"]), async (req, res) => {
   try {
     res.render("profile", { user: req.session.user, showWarning: req.query.warning ? true : false, warning: req.query.warning, cartAction: `/carts/${req.session.user.cart}`});
   } catch (error) {
-    req.logger.error(`${new Date().toDateString()}; ${error}; ${req.url}`);
-    res.send({ origin: config.SERVER, status: error.status, type: error.type, message: error.message });
-  }
+    throw error;
+  };
 });
 router.get("/mockingproducts", async (req, res) => {
   try {
@@ -106,12 +97,11 @@ router.get("/mockingproducts", async (req, res) => {
     if (!myProducts) throw new CustomError(errorDictionary.GENERATE_DATA_ERROR, "Mock de productos");
     return res.send(myProducts);
   } catch (error) {
-    req.logger.error(`${new Date().toDateString()}; ${error}; ${req.url}`);
-    res.send({ origin: config.SERVER, status: error.status, type: error.type, message: error.message });
-}
+    throw error;
+  };
 });
-router.get("/loggertest", async (req, res) => {
-  const date = new Date().toDateString();
+router.get("/loggertest", routeDate(), async (req, res) => {
+  const date = req.date;
   const where = req.url;
   const loggerFatal = await req.logger.fatal(`${date} "Esto es un ejemplo de fatal" ${where}`);
   const loggerError = await req.logger.error(`${date} "Esto es un ejemplo de error" ${where}`);
@@ -125,36 +115,31 @@ router.get("/restore", async (req, res) => {
   try {
     res.render("restore", { postAction: "/api/users/restore", showError: req.query.error ? true : false, errorMessage: req.query.error, showOk: req.query.ok ? true : false, okMessage: req.query.ok });
   } catch (error) {
-    req.logger.error(`${new Date().toDateString()}; ${error}; ${req.url}`);
-    res.send({ origin: config.SERVER, status: error.status, type: error.type, message: error.message });
-  }
+    throw error;
+  };
 });
 router.get("/restorecallback/:code", verifyRestoreCode(), async (req, res) => {
   try {
     const toSendObject = { postAction: "/api/users/restorecallback", dataErrorContainer: req.query.dataError ? true : false, dataError: req.query.dataError };
     res.render("restorecallback", { ...toSendObject });
   } catch (error) {
-    req.logger.error(`${new Date().toDateString()}; ${error}; ${req.url}`);
-    res.send({ origin: config.SERVER, status: error.status, type: error.type, message: error.message });
-  }
+    throw error;
+  };
 });
 router.get("/roleChange/:uid", handlePolicies(["ADMIN"]), verifyMDBID(["uid"]), async (req, res) => {
   try {
     const { uid } = req.params;
     res.render("roleChange", { postAction: `/api/users/premium/${uid}` });
   } catch (error) {
-    req.logger.error(`${new Date().toDateString()}; ${error}; ${req.url}`);
-    res.send({ origin: config.SERVER, status: error.status, type: error.type, message: error.message });
-  }
+    throw error;
+  };
 });
 router.get("/:uid/documents", handlePolicies(["USER", "PREMIUM", "ADMIN"]), verifyMDBID(["uid"], { compare: "USER" }), async (req, res) => {
   try {
     const { uid } = req.params;
-
     res.render("documents", {  postAction: `/api/users/${uid}/documents` })
   } catch (error) {
-    req.logger.error(`${new Date().toDateString()}; ${error}; ${req.url}`);
-    res.send({ origin: config.SERVER, status: error.status, type: error.type, message: error.message });
+    throw error;
   }
 });
 router.get("/user/:uid", handlePolicies(["ADMIN"]), async (req, res) => {
@@ -164,9 +149,8 @@ router.get("/user/:uid", handlePolicies(["ADMIN"]), async (req, res) => {
     if (!myUser) throw new CustomError(errorDictionary.FOUND_USER_ERROR);
     res.render("user", { roleChangeAction: `/roleChange/${uid}`, deleteUserAction: `/api/users/${uid}`, ...myUser });
   } catch (error) {
-    req.logger.error(`${new Date().toDateString()}; ${error}; ${req.url}`);
-    res.send({ origin: config.SERVER, status: error.status, type: error.type, message: error.message });
-  }
+    throw error;
+  };
 });
 router.get("/purchasecompleted", async (req, res) => {
   try {
@@ -177,4 +161,5 @@ router.get("/purchasecompleted", async (req, res) => {
     res.render("purchasecompleted", { showError: true, error: error });
   }
 });
+
 export default router;

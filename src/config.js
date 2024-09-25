@@ -26,7 +26,7 @@ CommandLine.parse()
 
 export const CLOptions = CommandLine.opts();
 
-const envPath = path.join(process.cwd().includes('src') ? '../environment' : './environment', `.env_${CLOptions.mode === 'production' ? 'production' : 'development'}`);
+const envPath = path.join((process.cwd().includes('src') || process.cwd().includes('test')) ? '../environment' : './environment', `.env_${CLOptions.mode === 'production' ? 'production' : 'development'}`);
 
 dotenv.config({ path: envPath });
 

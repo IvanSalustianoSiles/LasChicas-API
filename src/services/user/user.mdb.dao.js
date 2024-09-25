@@ -1,8 +1,6 @@
-import config from "../../config.js";
-import { usersModel } from "../../models/index.js";
-import { errorDictionary } from "../../config.js";
-import { cartsModel } from "../../models/index.js";
 import CustomError from "../custom.error.class.js";
+import { usersModel, cartsModel } from "../../models/index.js";
+import { errorDictionary } from "../../config.js";
 
 // Clase para controlar los métodos referentes a los usuarios.
 class UserMDBClass {
@@ -133,15 +131,6 @@ class UserMDBClass {
     }
   }
 };
-
-// Métodos a utilizar:
-// isRegistered (focusRoute, returnObject, req, res)
-// isRegisteredwToken (focusRoute, returnObject, req, res)
-// findUser (filter)
-// addUser (user)
-// updateUser (filter, update, options)
-// deleteUser (filter)
-// paginateUsers (...filters)
 
 const UserMDBService = new UserMDBClass(usersModel);
 

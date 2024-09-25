@@ -1,8 +1,7 @@
-import config from "../../config.js";
 import fs from "fs";
-import { generateRandomId } from "../utils.js";
-import { errorDictionary } from "../../config.js";
 import CustomError from "../custom.error.class.js";
+import config, { errorDictionary } from "../../config.js";
+import { generateRandomId } from "../utils.js";
 
 class TicketFSClass {
   constructor() {

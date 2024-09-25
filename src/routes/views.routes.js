@@ -86,7 +86,6 @@ router.get("/register", (req, res) => {
 });
 router.get("/profile", handlePolicies(["USER", "PREMIUM", "ADMIN"]), async (req, res) => {
   try {
-    console.log(req.session.user.cart)
     res.render("profile", { user: req.session.user, showWarning: req.query.warning ? true : false, warning: req.query.warning, cartAction: `/carts/${JSON.parse(JSON.stringify(req.session.user.cart))}`});
   } catch (error) {
     throw error;

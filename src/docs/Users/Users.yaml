@@ -4,9 +4,9 @@ info:
   description: API para la gestión de usuarios
   version: 1.0.0
 servers:
-  - url: http://localhost:8080/api
+  - url: http://localhost:8080
     description: Servidor local
-  - url: https://laschicas-api-production.up.railway.app/
+  - url: https://laschicas-api-production.up.railway.app
     description: Servidor en producción
 paths:
   /api/users:

@@ -51,7 +51,7 @@ export const handlePolicies = (policies) => {
       let user = req.session.user;
       if (!user) res.redirect("/login");
       let role = user.role.toUpperCase();   
-      if (!policies.includes(role)) throw new CustomError(errorDictionary.AUTHORIZE_USER_ERROR);
+      if (!policies.includes(role)) throw new CustomError(errorDictionary.AUTHORIZE_USER_ERROR, `Rol ${user.role} no permitido.`);
       req.user = user;
       next();
     } catch (error) {
@@ -73,6 +73,7 @@ export const verifyRestoreCode = () => {
 export const routeDate = () => {
   return (req, res, next) => {
     try {
+      console.log("Obviamente entra acá")
       const routeDate = new Date();
       if (!routeDate) throw new CustomError(errorDictionary.GENERATE_DATA_ERROR, "Fecha");
       req.date = routeDate;

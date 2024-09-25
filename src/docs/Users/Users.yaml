@@ -1,52 +1,52 @@
-openapi: 3.0.1
+openapi: 3.0.0
 info:
-  title: Documentación de API 'Las Chicas'
-  description: Documentación completa de toda mi API
+  title: User Management API
+  description: API para la gestión de usuarios
   version: 1.0.0
 servers:
-  - url: http://localhost:8080
-    description: Servidor de desarrollo
+  - url: http://localhost:8080/api
+    description: Servidor local
+  - url: https://laschicas-api-production.up.railway.app/
+    description: Servidor en producción
 paths:
   /api/users:
     get:
-      summary: Obtener usuarios
-      description: Obtiene una lista de usuarios paginados
+      summary: Obtiene una lista paginada de usuarios
       parameters:
         - name: limit
           in: query
           description: Límite de usuarios por página
-          required: false
           schema:
             type: integer
         - name: page
           in: query
-          description: Página de resultados
-          required: false
+          description: Página actual
           schema:
             type: integer
         - name: role
           in: query
-          description: Filtrar por rol de usuario
-          required: false
+          description: Filtrar por rol
           schema:
             type: string
       responses:
-        200:
+        '200':
           description: Lista de usuarios
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  status:
-                    type: integer
+                  origin:
+                    type: string
                   payload:
                     type: array
                     items:
                       $ref: '#/components/schemas/User'
+        '404':
+          description: No se encontraron usuarios
+
     post:
-      summary: Crear un nuevo usuario
-      description: Crea un nuevo usuario (solo administradores)
+      summary: Crea un nuevo usuario
       requestBody:
         required: true
         content:
@@ -54,23 +54,25 @@ paths:
             schema:
               $ref: '#/components/schemas/NewUser'
       responses:
-        200:
+        '200':
           description: Usuario creado exitosamente
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  status:
-                    type: integer
+                  origin:
+                    type: string
                   payload:
                     $ref: '#/components/schemas/User'
-  /api/users/{id}:
+        '400':
+          description: Error al crear el usuario
+
+  /api/users/{uid}:
     put:
-      summary: Actualizar un usuario
-      description: Actualiza la información de un usuario por ID (solo administradores)
+      summary: Actualiza un usuario
       parameters:
-        - name: id
+        - name: uid
           in: path
           required: true
           description: ID del usuario
@@ -81,9 +83,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserUpdate'
+              $ref: '#/components/schemas/UpdateUser'
       responses:
-        200:
+        '200':
           description: Usuario actualizado exitosamente
           content:
             application/json:
@@ -94,18 +96,20 @@ paths:
                     type: string
                   payload:
                     $ref: '#/components/schemas/User'
+        '404':
+          description: Usuario no encontrado
+
     delete:
-      summary: Eliminar un usuario
-      description: Elimina un usuario por ID (solo administradores)
+      summary: Elimina un usuario por ID
       parameters:
-        - name: id
+        - name: uid
           in: path
           required: true
           description: ID del usuario
           schema:
             type: string
       responses:
-        200:
+        '200':
           description: Usuario eliminado exitosamente
           content:
             application/json:
@@ -116,36 +120,44 @@ paths:
                     type: string
                   payload:
                     $ref: '#/components/schemas/User'
+        '404':
+          description: Usuario no encontrado
+
   /api/users/restore:
     post:
-      summary: Enviar enlace de restauración de contraseña
-      description: Envía un enlace al correo electrónico del usuario para restaurar la contraseña
+      summary: Envía un correo para restaurar contraseña
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RestoreRequest'
+              type: object
+              properties:
+                email:
+                  type: string
       responses:
-        200:
-          description: Enlace de restauración enviado exitosamente
+        '302':
+          description: Redirige a la página de confirmación
+
   /api/users/restorecallback:
     post:
-      summary: Validar cambio de contraseña
-      description: Valida el cambio de contraseña del usuario mediante el código enviado
+      summary: Cambia la contraseña del usuario
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PasswordUpdate'
+              type: object
+              properties:
+                password:
+                  type: string
       responses:
-        200:
-          description: Contraseña actualizada exitosamente
+        '302':
+          description: Redirige a la página de perfil
+
   /api/users/premium/{uid}:
     post:
-      summary: Cambiar el rol de un usuario
-      description: Cambia el rol de un usuario a 'premium' o 'user' (solo administradores)
+      summary: Actualiza el rol del usuario a premium o user
       parameters:
         - name: uid
           in: path
@@ -154,8 +166,8 @@ paths:
           schema:
             type: string
       responses:
-        200:
-          description: Rol actualizado exitosamente
+        '200':
+          description: Rol del usuario actualizado exitosamente
           content:
             application/json:
               schema:
@@ -165,6 +177,46 @@ paths:
                     type: string
                   payload:
                     type: string
+
+  /api/users/{uid}/documents:
+    post:
+      summary: Subir documentos para un usuario
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                docs:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        '200':
+          description: Documentos subidos exitosamente
+        '400':
+          description: Error al subir documentos
+
+  /api/users/:
+    delete:
+      summary: Elimina usuarios inactivos
+      responses:
+        '200':
+          description: Usuarios eliminados exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  origin:
+                    type: string
+                  payload:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+
 components:
   schemas:
     User:
@@ -191,7 +243,7 @@ components:
           type: string
         password:
           type: string
-    UserUpdate:
+    UpdateUser:
       type: object
       properties:
         first_name:
@@ -201,14 +253,4 @@ components:
         email:
           type: string
         role:
-          type: string
-    RestoreRequest:
-      type: object
-      properties:
-        email:
-          type: string
-    PasswordUpdate:
-      type: object
-      properties:
-        password:
           type: string

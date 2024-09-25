@@ -72,6 +72,7 @@ export const verifyRestoreCode = () => {
 export const routeDate = () => {
   return (req, res, next) => {
     try {
+      console.log(config.GITHUB_CLIENT_ID, config.GITHUB_CLIENT_SECRET, config.GITHUB_CALLBACK_URL)
       const routeDate = new Date();
       if (!routeDate) throw new CustomError(errorDictionary.GENERATE_DATA_ERROR, "Fecha");
       req.date = routeDate;

@@ -69,7 +69,6 @@ const initAuthStrategies = () => {
       },
       async (req, accessToken, refreshToken, profile, done) => {
         try {
-          console.log("hola")
           const emailList = profile.emails || null;
           let email = profile._json?.email || null;
           if (!email && !emailList) {

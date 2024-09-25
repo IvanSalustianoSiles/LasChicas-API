@@ -38,7 +38,6 @@ class CartMDBClass {
           { _id: cid, "products._id": pid },
           { $set: { "products.$.quantity": myProduct.quantity } }
         );
-        console.log(`Ahora hay ${myProduct["quantity"]} productos de ID ${pid} en el carrito de ID ${cid}.`);
         return myProduct;
       } else {
         await this.model.findByIdAndUpdate(

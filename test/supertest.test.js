@@ -46,7 +46,7 @@ describe("Test Integración Autenticación de usuario", function() {
         
         userId = myUser._id;
     });
-    it("POST api/auth/login | No debe loguear un usurio que no ingrese todos los campos", async function() {
+    it("POST api/auth/login | No debe loguear un usuario que no ingrese todos los campos", async function() {
         const { statusCode, _body } = await requester.post("/api/auth/login").send({ email: "fake@gmail.com" });
         expect(_body.error).to.be.ok;
         expect(statusCode).to.be.equals(400);
@@ -72,7 +72,6 @@ describe("Test Integración Autenticación de usuario", function() {
     });
     it("GET api/auth/logout | Debe fallar al intentar destruir una sesión inexistente y retornar un error", async function() {
         const { _body } = await requester.get("/api/auth/logout") 
-        console.log(_body)
         expect(_body).to.be.ok;     
         expect(_body.type).to.be.ok;      
         expect(_body.type).to.be.have.property("code", 9);

@@ -36,7 +36,7 @@ router.post("/register", routeDate(), verifyRequiredBody(["first_name", "last_na
     }
   }
 );
-router.get("/ghlogin", routeDate(), passport.authenticate("ghlogin", { scope: ["user"] }), async (req, res) => {
+router.get("/ghlogin", routeDate(), passport.authenticate("ghlogin"), async (req, res) => {
 }
 );
 router.get("/ghlogincallback", routeDate(), passport.authenticate("ghlogin", { failureRedirect: `/login?error=${encodeURI("Error de autenticación con GitHub")}` }), async (req, res) => {

@@ -63,10 +63,8 @@ class CartFSClass {
         myCart["products"].push(newProduct);
         this.cartsArray.push(myCart);
         await this.updateFile(this.cartsArray, this.cartPath);
-        console.log(`Ahora hay ${myProduct["quantity"]} productos de ID ${pid} en el carrito de ID ${cid}.`);
       } else {
         myCart["products"].push(newProduct);
-        console.log(`Producto de ID ${pid} agregado.`);
       }
       await this.updateFile(this.cartsArray, this.cartPath);
       return myCart;

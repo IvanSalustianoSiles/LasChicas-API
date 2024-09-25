@@ -5,7 +5,6 @@ import { errorDictionary } from "../config.js";
 import { faker } from "@faker-js/faker";
 
 // Middlewares
-
 export const verifyMDBID = (ids, check = undefined) => {
   return (req, res, next) => {
     try {
@@ -73,7 +72,6 @@ export const verifyRestoreCode = () => {
 export const routeDate = () => {
   return (req, res, next) => {
     try {
-      console.log("Obviamente entra acá")
       const routeDate = new Date();
       if (!routeDate) throw new CustomError(errorDictionary.GENERATE_DATA_ERROR, "Fecha");
       req.date = routeDate;

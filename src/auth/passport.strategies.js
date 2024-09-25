@@ -70,9 +70,10 @@ const initAuthStrategies = () => {
       async (req, accessToken, refreshToken, profile, done) => {
         try {
           const emailList = profile.emails || null;
+          let response;
           let email = profile._json?.email || null;
           if (!email && !emailList) {
-            const response = await fetch("https://api.github.com/user/emails", {
+            response = await fetch("https://api.github.com/user/emails", {
               headers: {
                 "Authorization": `token ${accessToken}`,
                 "User-Agent": config.APP_NAME
@@ -100,7 +101,7 @@ const initAuthStrategies = () => {
               if (!addingUser) throw new CustomError(errorDictionary.ADD_DATA_ERROR, "Usuario");
               return done(null, addingUser);
             } else {
-              req.logger.info(`Usuario previamente registrado.`);
+              console.log(`Usuario previamente registrado.`);
               if (foundUser.active == false) return done("Tu usuario aún existe pero ha sido desactivado por falta de actividad. Por favor, contáctate con servicio técnico.");
               const updatedUser = await UserManager.updateUser({ email: foundUser.email }, { last_connection: req.date }, { new: true }); 
               if (!updatedUser) throw new CustomError(errorDictionary.UPDATE_DATA_ERROR, "Usuario");

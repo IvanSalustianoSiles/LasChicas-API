@@ -4,7 +4,7 @@ import { UserManager } from "../src/controllers/index.js";
 import mongoose from "mongoose";
 import config from "../src/config.js";
 const expect = chai.expect;
-const requester = supertest("https://laschicas-api-production.up.railway.app");
+const requester = supertest("https://laschicas-api.onrender.com");
 const testUser = { first_name: "Jerry", last_name: "Smith", password: "Coki2011", email: "jerrysmith@gmail.com" };
 let cookie = {};
 let userId;

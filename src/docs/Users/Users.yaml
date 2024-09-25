@@ -6,7 +6,7 @@ info:
 servers:
   - url: http://localhost:8080
     description: Servidor local
-  - url: https://laschicas-api-production.up.railway.app
+  - url: https://laschicas-api.onrender.com
     description: Servidor en producción
 paths:
   /api/users:

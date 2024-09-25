@@ -80,7 +80,7 @@ router.post("/restore", async (req, res) => {
       `<div> 
         <h1>Hola, ${emailValidation.first_name}!</h1>
         <h2>Este es tu link de cambio de contraseña:</h2>
-        <a href=https://laschicas-api-production.up.railway.app/restorecallback/${req.session.secretCode}>Validar contraseña</a>
+        <a href=https://laschicas-api.onrender.com/restorecallback/${req.session.secretCode}>Validar contraseña</a>
         <h4>Hora [ARG]: ${generateDateAndHour()}</h4>
         <h2>Vence muy pronto así que te recomendamos usarlo ahora mismo.</h2>
         <h2>Hasta luego y gracias por elegirnos!</h2>

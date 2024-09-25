@@ -22,7 +22,7 @@ router.post("/login", routeDate(), verifyRequiredBody(["email", "password"]), pa
       throw error;
     }
   }
-); // CHECKED MDB
+); 
 router.post("/register", routeDate(), verifyRequiredBody(["first_name", "last_name", "password", "email"]), passport.authenticate("register", { failureRedirect: `/register?error=${encodeURI("Email y/o contraseña no válidos.")}` }), async (req, res) => {
     try {       
       req.session.user = req.user;
@@ -36,10 +36,10 @@ router.post("/register", routeDate(), verifyRequiredBody(["first_name", "last_na
       throw error;
     }
   }
-); // CHECKED MDB
+); 
 router.get("/ghlogin", routeDate(), passport.authenticate("ghlogin"), async (req, res) => {
 }
-); // CHECKED MDB
+); 
 router.get("/ghlogincallback", routeDate(), passport.authenticate("ghlogin", { failureRedirect: `/login?error=${encodeURI("Error de autenticación con GitHub")}` }), async (req, res) => {
     try {
       req.session.user = req.user;
@@ -52,7 +52,7 @@ router.get("/ghlogincallback", routeDate(), passport.authenticate("ghlogin", { f
       throw error;
     };
   }
-); // CHECKED MDB
+); 
 router.get("/private", routeDate(), handlePolicies(["ADMIN"]), async (req, res) => {
   try {
     await req.logger.warning(`${req.date} Usuario "${req.session.user.email}" entró a la ruta privada. | ::[${req.url}]`);
@@ -60,7 +60,7 @@ router.get("/private", routeDate(), handlePolicies(["ADMIN"]), async (req, res) 
   } catch (error) {
     throw error;
   }
-}); // CHECKED MDB
+}); 
 router.get("/logout", routeDate(), async (req, res) => {
   try {
     const email = await req.session.user ? req.session.user.email : undefined; 
@@ -75,7 +75,7 @@ router.get("/logout", routeDate(), async (req, res) => {
   } catch (error) {
     res.send(error);
   }
-}); // CHECKED MDB
+}); 
 router.get("/current", routeDate(), async (req, res) => {
   try {
     if (!req.session.user) return res.redirect("/login");
@@ -86,7 +86,7 @@ router.get("/current", routeDate(), async (req, res) => {
   } catch (error) {
     throw error;
   };
-}); // CHECKED MDB
+}); 
 catchCall(router, "autenticaciones");
 
 export default router;

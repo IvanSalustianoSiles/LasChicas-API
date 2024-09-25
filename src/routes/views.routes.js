@@ -14,7 +14,7 @@ router.get("/", async (req, res) => {
   } catch (error) {
     throw error;
   };
-}); // CHECKED FS
+}); 
 router.get("/products", handlePolicies(["USER", "PREMIUM", "ADMIN"]), async (req, res) => {
   try {
     let paginated = await ProductManager.getPaginatedProducts( req.query.limit, req.query.page, req.query.query, req.query.sort, req.query.available, "/products");
@@ -45,7 +45,7 @@ router.get("/products", handlePolicies(["USER", "PREMIUM", "ADMIN"]), async (req
   } catch (error) {
     throw error;
   };
-}); // CHECKED FS
+}); 
 router.get("/carts/:cid", handlePolicies(["USER", "PREMIUM", "ADMIN"]), verifyMDBID(["cid"], { compare: "CART" }), async (req, res) => {
   try {
     const { cid } = req.params;
@@ -74,7 +74,7 @@ router.get("/login", async (req, res) => {
   } catch (error) {
     throw error;
   };
-}); // CHECKED FS
+}); 
 router.get("/register", (req, res) => {
   try {
     !req.session.user

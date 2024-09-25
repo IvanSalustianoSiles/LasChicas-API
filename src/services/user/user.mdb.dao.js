@@ -41,10 +41,10 @@ class UserMDBClass {
 
       const cart = await cartsModel.create({ products: [] });     
       
-      const newUser = { ...user, cart: cart };
-      
+      const newUser = { ...user, cart: JSON.parse(JSON.stringify(cart._id)) };
+
       const dbUser = await this.model.create(newUser);
-      
+
       if (!dbUser) throw new CustomError(errorDictionary.FOUND_USER_ERROR, `Usuario a agregar`);
       return dbUser;
     } catch (error) {

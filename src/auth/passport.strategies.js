@@ -94,7 +94,7 @@ const initAuthStrategies = () => {
                 last_name: last,
                 email: email,
                 password: "none",
-                cart: await cart.ID,
+                cart: JSON.parse(JSON.stringify(cart._id)),
                 last_connection: req.date
               };
               const addingUser = await UserManager.addUser(newUser);

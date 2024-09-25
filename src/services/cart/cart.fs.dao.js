@@ -27,7 +27,7 @@ class CartFSClass {
       this.cartsArray.push(newCart);
       await this.updateFile(this.cartsArray, this.cartPath);
   
-      return { msg: "Carrito creado en el archivo local.", ID: newCart._id };
+      return newCart;
     } catch (error) {
       return undefined;
     }
@@ -113,7 +113,8 @@ class CartFSClass {
   getCartById = async (cid) => {
     try {
       if (!cid) throw new CustomError(errorDictionary.FEW_PARAMS_ERROR, `Cart ID`);
-      await this.readFileAndSave(this.cartsArray, this.cartPath);
+      lecture = await this.readFileAndSave(this.cartsArray, this.cartPath);
+      console.log(this.cartsArray);
       let cartById = await this.cartsArray.find((cart) => cart._id == cid);
       if (!cartById) throw new CustomError(errorDictionary.GENERAL_FOUND_ERROR, "Carrito");
       return cartById;
@@ -201,7 +202,7 @@ class CartFSClass {
   readFileAndSave = async (array, path) => {
     try {
       if (fs.existsSync(path)) {
-        let fileContent = fs.readFile(path, "utf-8", () => {});
+        let fileContent = fs.readFileSync(path, "utf-8");
         let parsedFileContent = await JSON.parse(fileContent);
         array = await parsedFileContent;
       } else if (this.getting) {

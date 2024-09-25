@@ -14,7 +14,7 @@ class CartMDBClass {
       let toSendObject = await this.model.create({ products: [] });
       if (!toSendObject) throw new CustomError(errorDictionary.GENERATE_DATA_ERROR, `Carrito`);
       let toSendID = toSendObject["_id"];
-      return { msg: "Carrito creado en la base de datos.", ID: toSendID };
+      return toSendObject;
     } catch (error) {
       return undefined;
     }

@@ -3,12 +3,13 @@
         "_id": "66d265082b1c1d8c4acdd29b",
         "first_name": "Iván Salustiano ",
         "last_name": "Siles",
-        "password": "$2b$10$pG3pw4JApDzEp2xyppb1SeZrvwW3MIl2ayebbrGqJvJGEp5RF13CC",
+        "password": "$2b$10$bzxNFf7MCRbVxo.9eXZgm.0tx5JpYLZ06386DpqLS.jKaZ7QlEmjK",
         "role": "admin",
         "email": "silesivansalustiano@gmail.com",
         "phoneNumber": "1132874847",
         "description": "Viviendo la vida",
         "age": 20,
-        "cart": "66d265072b1c1d8c4acdd299"
+        "cart": "66d265072b1c1d8c4acdd299",
+        "last_connection": "2024-09-25T07:31:24.175Z"
     }
 ]

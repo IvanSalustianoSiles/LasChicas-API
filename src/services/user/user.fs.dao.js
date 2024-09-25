@@ -1,7 +1,7 @@
 import CustomError from "../custom.error.class.js";
 import fs from "fs";
 import config, { errorDictionary } from "../../config.js";
-import { cartsModel } from "../../models/carts.model.js";
+import CartFSService from "../cart/cart.fs.dao.js";
 import { generateRandomId } from "../utils.js";
 
 // Clase para controlar los métodos referentes a los usuarios.
@@ -54,8 +54,8 @@ class UserFSClass {
       while (this.userArray.some(pUser => pUser._id == user._id)) {
         user._id = generateRandomId();
       };
-      const cart = await cartsModel.create({ products: [] });     
-      const newUser = { ...user, cart: cart };
+      const cart = await CartFSService.createCart();     
+      const newUser = { ...user, cart: cart._id };
       await this.readFileAndSave();
       this.userArray.push(newUser);
       await this.updateFile(this.userArray);

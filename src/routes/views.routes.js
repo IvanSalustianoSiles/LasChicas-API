@@ -14,7 +14,7 @@ router.get("/", async (req, res) => {
   } catch (error) {
     throw error;
   };
-});
+}); // CHECKED FS
 router.get("/products", handlePolicies(["USER", "PREMIUM", "ADMIN"]), async (req, res) => {
   try {
     let paginated = await ProductManager.getPaginatedProducts( req.query.limit, req.query.page, req.query.query, req.query.sort, req.query.available, "/products");
@@ -45,7 +45,7 @@ router.get("/products", handlePolicies(["USER", "PREMIUM", "ADMIN"]), async (req
   } catch (error) {
     throw error;
   };
-});
+}); // CHECKED FS
 router.get("/carts/:cid", handlePolicies(["USER", "PREMIUM", "ADMIN"]), verifyMDBID(["cid"], { compare: "CART" }), async (req, res) => {
   try {
     const { cid } = req.params;
@@ -54,7 +54,7 @@ router.get("/carts/:cid", handlePolicies(["USER", "PREMIUM", "ADMIN"]), verifyMD
     if (!cart) throw new CustomError(errorDictionary.GENERAL_FOUND_ERROR, `Carrito`);
     const toSendObject = await CartManager.getProductsOfACart(cart);
     let voidWarning = false;
-    if (toSendObject.length == 0) voidWarning = true;
+    if (Array.isArray(toSendObject) && toSendObject.length == 0) voidWarning = true;
     if (!toSendObject) throw new CustomError(errorDictionary.GENERAL_FOUND_ERROR, `Productos del carrito`);
     res.render("cart", { toSendObject: toSendObject, voidWarning: voidWarning, purchaseAction: `/api/carts/${cid}/purchase`, deleteProductAction: `/api/carts/${cid}/product`, cleanAction: `/api/carts/${cid}` });
   } catch (error) {
@@ -74,7 +74,7 @@ router.get("/login", async (req, res) => {
   } catch (error) {
     throw error;
   };
-});
+}); // CHECKED FS
 router.get("/register", (req, res) => {
   try {
     !req.session.user
@@ -86,7 +86,8 @@ router.get("/register", (req, res) => {
 });
 router.get("/profile", handlePolicies(["USER", "PREMIUM", "ADMIN"]), async (req, res) => {
   try {
-    res.render("profile", { user: req.session.user, showWarning: req.query.warning ? true : false, warning: req.query.warning, cartAction: `/carts/${req.session.user.cart}`});
+    console.log(req.session.user.cart)
+    res.render("profile", { user: req.session.user, showWarning: req.query.warning ? true : false, warning: req.query.warning, cartAction: `/carts/${JSON.parse(JSON.stringify(req.session.user.cart))}`});
   } catch (error) {
     throw error;
   };

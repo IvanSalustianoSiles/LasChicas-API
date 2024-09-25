@@ -24,7 +24,7 @@ router.get("/", handlePolicies(["ADMIN"]), async (req, res) => {
   } catch (error) {
     throw error;
 }
-});
+}); // CHECKED MDB
 router.post("/", routeDate(), handlePolicies(["USER", "PREMIUM", "ADMIN"]), async (req, res) => {
   try {
     toSendObject = await CartManager.createCart();
@@ -34,7 +34,7 @@ router.post("/", routeDate(), handlePolicies(["USER", "PREMIUM", "ADMIN"]), asyn
   } catch (error) {
     throw error;
   };
-});
+}); // CHECKED MDB
 router.get("/:cid", verifyMDBID(["cid"], { compare: "CART" }), async (req, res) => {
   try {
     const { cid } = req.params;
@@ -44,7 +44,7 @@ router.get("/:cid", verifyMDBID(["cid"], { compare: "CART" }), async (req, res) 
   } catch (error) {
     throw error;
   };
-});
+}); // CHECKED MDB
 router.post("/:cid/product/:pid", handlePolicies(["USER", "PREMIUM", "ADMIN"]), verifyMDBID(["cid", "pid"], { compare: "CART" }), async (req, res) => {
   try {
     const { pid, cid } = req.params;
@@ -54,7 +54,7 @@ router.post("/:cid/product/:pid", handlePolicies(["USER", "PREMIUM", "ADMIN"]), 
   } catch (error) {
     throw error;
   };
-});
+}); // CHECKED MDB
 router.delete("/:cid/product/:pid", handlePolicies(["USER", "PREMIUM", "ADMIN"]), verifyMDBID(["cid", "pid"], { compare: "CART" }), async (req, res) => {
   try {
     const { pid, cid } = req.params;
@@ -64,7 +64,7 @@ router.delete("/:cid/product/:pid", handlePolicies(["USER", "PREMIUM", "ADMIN"])
   } catch (error) {
     throw error;
   };
-});
+}); // CHECKED MDB
 router.put("/:cid", handlePolicies(["USER", "PREMIUM", "ADMIN"]), verifyMDBID(["cid"], { compare: "CART" }), async (req, res) => {
   try {
     const { cid } = req.params;
@@ -84,7 +84,7 @@ router.put("/:cid/product/:pid", handlePolicies(["USER", "PREMIUM", "ADMIN"]), v
   } catch (error) {
     throw error;
   };
-});
+}); 
 router.delete("/:cid", routeDate(), handlePolicies(["USER", "PREMIUM", "ADMIN"]), verifyMDBID(["cid"], { compare: "CART" }), async (req, res) => {
   try {
     const { cid } = req.params;
@@ -95,7 +95,7 @@ router.delete("/:cid", routeDate(), handlePolicies(["USER", "PREMIUM", "ADMIN"])
   } catch (error) {
     throw error;
   };
-});
+}); // CHECKED MDB
 router.get("/:cid/purchase", routeDate(), handlePolicies(["USER", "PREMIUM"]), verifyMDBID(["cid"], { compare: "CART" }), async (req, res) => {
   try {
     const { cid } = req.params;
@@ -166,7 +166,7 @@ router.get("/:cid/purchase", routeDate(), handlePolicies(["USER", "PREMIUM"]), v
   } catch (error) {
     throw error;
   };
-});
+}); // CHECKED MDB
 catchCall(router, "carritos");
 
 export default router;

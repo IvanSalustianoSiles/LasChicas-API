@@ -132,7 +132,7 @@ router.get("/:cid/purchase", routeDate(), handlePolicies(["USER", "PREMIUM"]), v
       amount += ticketQuantity * product.price;
     }
     const ticketGen = await TicketManager.createTicket({code: generateRandomCode(), purchase_datetime: generateDateAndHour(), amount: amount, purchaser: req.user.email });
-    
+
     if (!ticketGen) throw new CustomError(errorDictionary.GENERATE_DATA_ERROR, `Ticket`);
 
     await req.logger.info(`${req.date} Compra realizada por "${req.session.user.email}". ${req.url}`);

@@ -96,7 +96,7 @@ router.post("/restorecallback", routeDate(), async (req, res) => {
     if (!req.session.secretCode || !req.session.temporalEmail) res.redirect(`/restore?error=${encodeURI(`Acceso denegado: Probablemente su link caducó.`)}`);
     
     const { password } = req.body;    
-
+    
     const user = await UserManager.findUser({email: req.session.temporalEmail });
     
     const validationPass = isValidPassword(user, password);

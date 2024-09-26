@@ -30,9 +30,9 @@
     let buttons = document.querySelectorAll(".prodButton");
 
     buttons.forEach((button, i) => {
-        let pid = products[i].children[7].textContent;
+        let pid = products[i].children[7];
         button.addEventListener("click", () => {
-            fetch(`{{deleteProductAction}}/${pid}`, {
+            fetch(`{{deleteProductAction}}/${pid.innerText}`, {
                 method: "DELETE",
                 body: {}
             }).then((res) => {

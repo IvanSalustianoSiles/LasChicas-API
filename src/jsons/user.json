@@ -1,15 +1,1 @@
-[
-    {
-        "_id": "66d265082b1c1d8c4acdd29b",
-        "first_name": "Iván Salustiano ",
-        "last_name": "Siles",
-        "password": "$2b$10$bzxNFf7MCRbVxo.9eXZgm.0tx5JpYLZ06386DpqLS.jKaZ7QlEmjK",
-        "role": "admin",
-        "email": "silesivansalustiano@gmail.com",
-        "phoneNumber": "1132874847",
-        "description": "Viviendo la vida",
-        "age": 20,
-        "cart": "66d265072b1c1d8c4acdd299",
-        "last_connection": "2024-09-25T07:31:24.175Z"
-    }
-]
+[{"_id":"66d265082b1c1d8c4acdd29b","first_name":"Iván Salustiano ","last_name":"Siles","password":"$2b$10$8Mq3aPEnUuMpSCBkaGJVMO6ttPmptq7HogeSqyxVP37lhpJvs3tJi","role":"admin","email":"silesivansalustiano@gmail.com","phoneNumber":"1132874847","description":"Viviendo la vida","age":20,"cart":"66d265072b1c1d8c4acdd299","last_connection":"2024-09-26T07:00:14.066Z"},{"first_name":"Romualdo","last_name":"Perez","password":"$2b$10$tRkr0pUt31lw7EWKC.j5Me2tsk7ZFhqOJuAFDA/FBV5PL9/CI1Zz2","email":"romi1234@gmail.com","phoneNumber":"1132874850","description":"Soy Romi","age":"63","last_connection":"2024-09-25T22:37:01.147Z","role":"user","_id":"Ab76d01CcfbeedaF9FA3E8fd","cart":"E72aadc56ACA7AdC34f2DC1a"},{"first_name":"Martina","last_name":"Carreras","password":"$2b$10$NGbfRiBFbWjYHXZBUZCUm.LqUPNtMtVSUxqWQduiwnoNRnx8aih12","email":"martina.carreras3@outlook.com","phoneNumber":"1173608987","description":"Primera Dama File System","age":"21","last_connection":"2024-09-26T01:08:59.153Z","role":"user","_id":"0Bc8676Ba97e11b8A8D3515a","cart":"b998a18665aEAA5d8daB3Bf1"},{"first_name":"juanfile","last_name":"system","password":"$2b$10$pBcBUq291dOJioBWjDrgJeWYZ5gC6A5fulub4NE6ruBELBhsEDkhy","email":"juanfs@gmail.com","phoneNumber":"1173608987","description":"Soy juancito","age":"19","last_connection":"2024-09-26T06:15:32.015Z","role":"user","_id":"b1AbeEDbea23c39C3E9Cc0F6","cart":"4f2AD086CdE59fd77dE13526"},{"first_name":"Iván","last_name":"Fs","password":"$2b$10$3n2fljC89yHFXSfNhMGJp.14DGIRy5tQfiO.i9OHJjrV19McooWc2","email":"ivanfs@gmail.com","phoneNumber":"1173608987","description":"Soy el creador","age":"29","last_connection":"2024-09-26T06:59:00.055Z","role":"user","_id":"6Dd4e6E6e3aBfA7Cb0a2c3Fd","cart":"caD5Bd222978aDFA17aF46f4"}]

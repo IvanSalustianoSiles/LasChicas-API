@@ -52,11 +52,12 @@ router.get("/carts/:cid", handlePolicies(["USER", "PREMIUM", "ADMIN"]), verifyMD
     if (!cid) throw new CustomError(errorDictionary.FOUND_ID_ERROR, `${cid}`);
     const cart = await CartManager.getCartById(cid);
     if (!cart) throw new CustomError(errorDictionary.GENERAL_FOUND_ERROR, `Carrito`);
-    const toSendObject = await CartManager.getProductsOfACart(cart);
+    const toSendObject = await CartManager.getProductsOfACart(cid);
     let voidWarning = false;
+    const fixedId = JSON.parse(JSON.stringify(cid));
     if (Array.isArray(toSendObject) && toSendObject.length == 0) voidWarning = true;
     if (!toSendObject) throw new CustomError(errorDictionary.GENERAL_FOUND_ERROR, `Productos del carrito`);
-    res.render("cart", { toSendObject: toSendObject, voidWarning: voidWarning, purchaseAction: `/api/carts/${cid}/purchase`, deleteProductAction: `/api/carts/${cid}/product`, cleanAction: `/api/carts/${cid}` });
+    res.render("cart", { toSendObject: toSendObject, voidWarning: voidWarning, purchaseAction: `/api/carts/${fixedId}/purchase`, deleteProductAction: `/api/carts/${fixedId}/product`, cleanAction: `/api/carts/${fixedId}` });
   } catch (error) {
     throw error;
   };

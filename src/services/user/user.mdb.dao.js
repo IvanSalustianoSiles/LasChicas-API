@@ -41,7 +41,7 @@ class UserMDBClass {
 
       const cart = await cartsModel.create({ products: [] });     
       
-      const newUser = { ...user, cart: JSON.parse(JSON.stringify(cart._id)) };
+      const newUser = { ...user, cart: cart._id };
 
       const dbUser = await this.model.create(newUser);
 
@@ -57,7 +57,7 @@ class UserMDBClass {
       let dbUser = {};
 
       const { multi, ...restOptions } = options;
-
+      
       if (multi) {
         if (!options.new) dbUser = await this.model.find(filter).lean();
         await this.model.updateMany(filter, update, restOptions);

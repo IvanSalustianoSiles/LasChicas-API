@@ -53,12 +53,12 @@ class CartFSClass {
       let myCart = await this.getCartById(cid);
   
       if (!myCart) throw new CustomError(errorDictionary.GENERAL_FOUND_ERROR, `Producto`);
-  
-      let myProduct = await myCart["products"].find((product) => product._id == pid);
+
+      let myProduct = await myCart.products.find((product) => product._id._id == newProduct._id._id);
       
       if (myProduct) {
         const indexOfProd = myCart["products"].indexOf(myProduct);
-        newProduct["quantity"] = myProduct["quantity"] + newProduct.quantity;
+        newProduct.quantity = myProduct.quantity + newProduct.quantity;
         myCart["products"].splice(indexOfProd, 1);
         myCart["products"].push(newProduct);
         this.cartsArray.push(myCart);
@@ -74,13 +74,17 @@ class CartFSClass {
   };
   getProductsOfACart = async (cid) => {
     try {
-      if (!cid) throw new CustomError(errorDictionary.FEW_PARAMS_ERROR, `Cart ID`);
       this.getting = true;
+      if (!cid) throw new CustomError(errorDictionary.FEW_PARAMS_ERROR, `Cart ID`);
       await this.readFileAndSave(this.cartsArray, this.cartPath);
-      let gottenCart = await this.getCartById(cid);
+      let gottenCart = await this.cartsArray.find((cart) => cart._id == cid);
       if (gottenCart) {
         this.getting = false;
-        return gottenCart["products"];
+        let products = await gottenCart.products.map(product => {
+          let fixedProduct = { ...product._id, quantity: product.quantity };
+          return fixedProduct;
+        });
+        return products;
       } else {
         throw new CustomError(errorDictionary.GENERAL_FOUND_ERROR, `Carrito`);
       }
@@ -92,18 +96,16 @@ class CartFSClass {
     try {
       if (!pid || !cid) throw new CustomError(errorDictionary.FEW_PARAMS_ERROR, `${ !pid ? "Product ID" : "Cart ID" }`);
       await this.readFileAndSave(this.cartsArray, this.cartPath);
-      if (!pid || !cid) throw new CustomError(errorDictionary.FEW_PARAMS_ERROR, `${ !pid ? "Product ID" : "Cart ID" }`);
-      let myCart = await this.getCartById(cid);
+      let myCart = await this.cartsArray.find((cart) => cart._id == cid);
       if (!myCart) throw new CustomError(errorDictionary.GENERAL_FOUND_ERROR, `Carrito`);
       const cartIndex = this.cartsArray.indexOf(myCart);
-      let myProduct = await myCart["products"].find(
-        (product) => product._id == pid
+      let myProduct = await myCart.products.find(
+        (product) => product._id._id == pid
       );
       if (!myProduct) throw new CustomError(errorDictionary.GENERAL_FOUND_ERROR, `Producto`);
-      const productIndex = myCart["products"].indexOf(myProduct);
-      myCart["products"].splice(productIndex, 1);
-      this.cartsArray.splice(cartIndex, 1);
-      this.cartsArray.push(myCart);
+      const productIndex = myCart.products.indexOf(myProduct);
+      myCart.products.splice(productIndex, 1);
+      this.cartsArray.splice(cartIndex, 1, myCart);
       await this.updateFile(this.cartsArray, this.cartPath);
       return `Producto de ID "${pid}" eliminado en el carrito de ID "${cid}".`;
     } catch (error) {
@@ -113,8 +115,7 @@ class CartFSClass {
   getCartById = async (cid) => {
     try {
       if (!cid) throw new CustomError(errorDictionary.FEW_PARAMS_ERROR, `Cart ID`);
-      lecture = await this.readFileAndSave(this.cartsArray, this.cartPath);
-      console.log(this.cartsArray);
+      await this.readFileAndSave(this.cartsArray, this.cartPath);
       let cartById = await this.cartsArray.find((cart) => cart._id == cid);
       if (!cartById) throw new CustomError(errorDictionary.GENERAL_FOUND_ERROR, "Carrito");
       return cartById;
@@ -126,7 +127,7 @@ class CartFSClass {
     try {
       if (!cid || !preUpdatedData) throw new CustomError(errorDictionary.FEW_PARAMS_ERROR, `${!cid ? "ID de carrito" : "Datos para actualizar"}`)
       await this.readFileAndSave(this.cartsArray, this.cartPath);
-      let myCart = await this.getCartById(cid);
+      let myCart = await this.cartsArray.find((cart) => cart._id == cid);
       if (!myCart) throw new CustomError(errorDictionary.GENERAL_FOUND_ERROR, "Carrito");
       myCart["products"] = []
       let updatedProducts = [];
@@ -180,7 +181,7 @@ class CartFSClass {
     try {
       if (!cid) throw new CustomError(errorDictionary.FEW_PARAMS_ERROR, "ID de carrito");
       await this.readFileAndSave(this.cartsArray, this.cartPath);
-      let myCart = await this.getCartById(cid);
+      let myCart = await this.cartsArray.find((cart) => cart._id == cid);
       if (!myCart) throw new CustomError(errorDictionary.GENERAL_FOUND_ERROR, "Carrito");
       const cartIndex = this.cartsArray.indexOf(myCart);
       myCart["products"] = [];
@@ -204,11 +205,12 @@ class CartFSClass {
       if (fs.existsSync(path)) {
         let fileContent = fs.readFileSync(path, "utf-8");
         let parsedFileContent = await JSON.parse(fileContent);
-        array = await parsedFileContent;
+        array.length = 0;
+        array.push(...parsedFileContent);
+        return await array;
       } else if (this.getting) {
         throw new CustomError(errorDictionary.GENERAL_FOUND_ERROR, "Lectura fallida, archivo no existente.");
-      }
-      return array;
+      };
     } catch (error) {
       return undefined;
     }

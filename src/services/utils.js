@@ -8,8 +8,11 @@ import { faker } from "@faker-js/faker";
 export const verifyMDBID = (ids, check = undefined) => {
   return (req, res, next) => {
     try {
+      // console.log(req.params);
       for (let i = 0; i < ids.length; i++) {
         let id = ids[i];
+        if (typeof(req.params[id]) === "object") req.params[id] = JSON.parse(JSON.stringify(req.params[id]));
+
         if (!config.MONGODB_ID_REGEX.test(req.params[id])) throw new CustomError(errorDictionary.AUTHORIZE_ID_ERROR, `${req.params[id]}`);
       } 
       if (check !== undefined && check.compare && req.session.user.role.toUpperCase() != "ADMIN") {

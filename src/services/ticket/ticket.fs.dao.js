@@ -25,10 +25,10 @@ class TicketFSClass {
         } 
       };
       ticketGen._id = generateRandomId();
-      
       this.ticketsArray.push(ticketGen);
       
       await this.updateFile(this.ticketsArray);
+      return ticketGen;
     } catch (error) {
       return undefined;
     };
@@ -37,7 +37,9 @@ class TicketFSClass {
     try {
       let tickets = await this.getAllTickets();
       if (!tickets) throw new CustomError(errorDictionary.GENERAL_FOUND_ERROR, `Tickets`);
-      let myTicket = await tickets.find(ticket => ticket._id == tid);
+
+      let myTicket = await tickets.find(ticket => ticket._id == tid._id);
+
       if (!myTicket) throw new CustomError(errorDictionary.GENERAL_FOUND_ERROR, "Ticket");
       return myTicket;
     } catch (error) {
@@ -55,7 +57,7 @@ class TicketFSClass {
   };
   updateFile = async (array) => {
     try {
-      fs.writeFile(`${this.path}`, JSON.stringify(array), () => {});
+      fs.writeFileSync(`${this.path}`, JSON.stringify(array));
     } catch (error) {
       return undefined;
     }

@@ -125,3 +125,4 @@
 [33merror[39m: [ERROR[403]::CODE[3]: Usuario no autorizado. (Datos ya ocupados) | ::[/api/auth/register]
 [33merror[39m: [ERROR[400]::CODE[11]: Ingrese los demás campos. (email,password) | ::[/api/auth/login]
 [33merror[39m: [ERROR[403]::CODE[3]: Usuario no autorizado. (Error al iniciar sesión) | ::[/api/auth/login]
+[33merror[39m: [ERROR[403]::CODE[3]: Usuario no autorizado. (Rol admin no permitido.) | ::[/api/carts/66f0de3507a8bf1ce711af2a/purchase]
